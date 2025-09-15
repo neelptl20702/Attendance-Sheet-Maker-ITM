@@ -88,6 +88,18 @@
                 <input type="file" id="student-file" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
                 <span id="file-name" class="text-slate-500 truncate">No file selected.</span>
             </div>
+            <div class="mt-4 flex items-center">
+                <input type="checkbox" id="headerless-file" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <label for="headerless-file" class="ml-2 block text-sm text-slate-800 font-medium">My file does not have a header row</label>
+            </div>
+
+            <hr class="my-6">
+
+            <div>
+                <h3 class="font-semibold text-slate-700 mb-2">Required Excel Format</h3>
+                <p class="text-slate-600 text-sm mb-4">Your file should have columns for enrollment number and student name. The column names don't matter, as you can map them in the next step.</p>
+                <img src="excel_preview.png" alt="Example of correct excel format" class="rounded-md border border-slate-300 shadow-sm" onerror="this.style.display='none'; this.parentElement.querySelector('p').textContent = 'Preview image (excel_preview.png) not found in repository.'">
+            </div>
 
             <div id="file-status" class="status-box hidden"></div>
             
@@ -204,6 +216,10 @@
                 </div>
                 <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Date</label><input type="text" id="exam-date" placeholder="Select Date..."></div>
                 <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Time</label><input type="text" id="exam-time" placeholder="Select Time..."></div>
+                <div class="md:col-span-2 flex items-center mt-2">
+                    <input type="checkbox" id="is-remedial-exam" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <label for="is-remedial-exam" class="ml-2 block text-sm text-slate-800 font-medium">Is this a Remedial Exam?</label>
+                </div>
             </div>
             
             <div class="flex items-center justify-end mt-6">
@@ -278,6 +294,7 @@
                 studentFile: document.getElementById('student-file'),
                 fileNameSpan: document.getElementById('file-name'),
                 fileStatus: document.getElementById('file-status'),
+                headerlessCheckbox: document.getElementById('headerless-file'),
                 nextToStep2Btn: document.getElementById('next-to-step2-btn'),
                 nextToStep3Btn: document.getElementById('next-to-step3-btn'),
                 generateBtn: document.getElementById('generate-btn'),
@@ -317,6 +334,7 @@
                     specialization: document.getElementById('specialization'),
                     examDate: document.getElementById('exam-date'),
                     examTime: document.getElementById('exam-time'),
+                    isRemedialExam: document.getElementById('is-remedial-exam'),
                 }
             };
 
@@ -385,18 +403,34 @@
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        state.tempJsonData = XLSX.utils.sheet_to_json(sheet);
                         
-                        if (state.tempJsonData.length === 0) {
-                            showStatus(ui.fileStatus, 'The file is empty. Please upload a valid file.', 'error');
-                            return;
+                        if (ui.headerlessCheckbox.checked) {
+                            const aoa = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                            if (aoa.length === 0) {
+                                showStatus(ui.fileStatus, 'The file is empty.', 'error');
+                                return;
+                            }
+                            state.rawHeaders = aoa[0].map((_, i) => `Column ${String.fromCharCode(65 + i)}`);
+                            state.tempJsonData = aoa.map(row => {
+                                const obj = {};
+                                state.rawHeaders.forEach((h, i) => {
+                                    obj[h] = row[i];
+                                });
+                                return obj;
+                            });
+                        } else {
+                            state.tempJsonData = XLSX.utils.sheet_to_json(sheet);
+                            if (state.tempJsonData.length === 0) {
+                                showStatus(ui.fileStatus, 'The file is empty or has no data.', 'error');
+                                return;
+                            }
+                            state.rawHeaders = Object.keys(state.tempJsonData[0]);
                         }
                         
-                        state.rawHeaders = Object.keys(state.tempJsonData[0]);
                         openMappingModal();
 
                     } catch (error) {
-                        showStatus(ui.fileStatus, `Error reading file: ${error.message}. Please ensure it's a valid CSV/Excel file.`, 'error');
+                        showStatus(ui.fileStatus, `Error reading file: ${error.message}.`, 'error');
                         console.error("File processing error:", error);
                     }
                 };
@@ -413,9 +447,8 @@
                     ui.nameMap.add(option.cloneNode(true));
                 });
                 
-                // Simple auto-detection for user convenience
-                const autoEnrollment = findHeader(state.rawHeaders, ['enrollment no', 'enrollment', 'roll no', 'roll', 'enr no', 'enrollment no.', 'enr. no.']);
-                const autoName = findHeader(state.rawHeaders, ['student name', 'name of student', 'name', 'full name', 'candidate name']);
+                const autoEnrollment = findHeader(state.rawHeaders, ['enrollment no', 'enrollment', 'roll no', 'roll', 'enr no', 'column a']);
+                const autoName = findHeader(state.rawHeaders, ['student name', 'name of student', 'name', 'full name', 'column b']);
                 if (autoEnrollment) ui.enrollmentMap.value = autoEnrollment;
                 if (autoName) ui.nameMap.value = autoName;
 
@@ -497,10 +530,8 @@
                      return;
                 }
 
-                // Clear any other blocks that might exist to ensure this is the ONLY one
                 ui.blocksContainer.innerHTML = '';
 
-                // Reset all student allocations and then allocate only those in range
                 state.studentData.forEach(s => s.isAllocated = false);
                 studentsInRange.forEach(s => s.isAllocated = true);
                 
@@ -511,10 +542,8 @@
                     count: studentsInRange.length
                 };
                 
-                // Add the one special block
                 addBlockInput(true, blockDetails);
 
-                // Immediately proceed to the final step, skipping further allocation
                 navigateToStep(3);
             }
 
@@ -554,7 +583,7 @@
             }
 
             function updateStudentCountStatus() {
-                window.updateStudentCountStatus = updateStudentCountStatus; // Make it globally accessible for the onclick
+                window.updateStudentCountStatus = updateStudentCountStatus;
                 
                 state.studentsToAllocateCount = state.studentData.filter(s => !s.isAllocated).length;
                 ui.totalStudentsToAllocate.textContent = state.studentsToAllocateCount;
@@ -582,7 +611,6 @@
                 if (totalInRegularBlocks === 0 && ui.blocksContainer.children.length === 0) {
                      ui.studentCountStatus.classList.add('hidden');
                 }
-                 // Handle case where only a special block exists
                 if (state.studentsToAllocateCount === 0 && ui.blocksContainer.querySelector('.block-students[readonly]')) {
                     ui.nextToStep3Btn.disabled = false;
                     ui.studentCountStatus.classList.add('hidden');
@@ -592,7 +620,6 @@
             
             // --- Step 3 & Final Generation ---
             async function generateSheets() {
-                // Clear previous error states
                 Object.values(ui.examDetails).forEach(el => el.classList.remove('input-error'));
 
                 const generalDetails = {
@@ -604,13 +631,14 @@
                     specialization: ui.examDetails.specialization.value,
                     examDate: ui.examDetails.examDate.value,
                     examTime: ui.examDetails.examTime.value,
+                    isRemedial: ui.examDetails.isRemedialExam.checked,
                 };
                 
                 let allDetailsFilled = true;
                 Object.keys(generalDetails).forEach(key => {
-                    if (generalDetails[key].trim() === '') {
+                    if (typeof generalDetails[key] === 'string' && generalDetails[key].trim() === '') {
                         allDetailsFilled = false;
-                        ui.examDetails[key].classList.add('input-error');
+                        ui.examDetails[key]?.classList.add('input-error');
                     }
                 });
 
@@ -633,12 +661,12 @@
                         const studentCountInput = block.querySelector('.block-students');
                         const count = parseInt(studentCountInput.value);
 
-                        if (studentCountInput.hasAttribute('readonly')) { // Special block
+                        if (studentCountInput.hasAttribute('readonly')) {
                             allBlockStudents.push({
                                 students: state.studentData.filter(s => s.isAllocated),
                                 details: getBlockDetails(block, count, generalDetails)
                             });
-                        } else { // Regular block
+                        } else {
                             const students = state.studentData.slice(studentIndexForRegularBlocks, studentIndexForRegularBlocks + count);
                             studentIndexForRegularBlocks += count;
                             allBlockStudents.push({
@@ -689,8 +717,6 @@
             async function drawPageOnDoc(doc, students, examDetails) {
                 const pageWidth = doc.internal.pageSize.getWidth();
                 let startY;
-
-                // --- Header Section ---
                 let headerEndY = 10;
                 
                 const addLogoPromise = new Promise((resolve) => {
@@ -728,12 +754,21 @@
                 
                 doc.setFont("helvetica", "normal").setFontSize(10);
                 doc.text("Attendance Sheet", pageWidth - 15, 15, { align: "right" });
-                doc.text(`${examDetails.branch} ${examDetails.semester} - ${examDetails.academicYear}`, pageWidth - 15, 20, { align: "right" });
+                
+                let courseDetailsString = examDetails.branch;
+                if (examDetails.isRemedial) {
+                    courseDetailsString += ' Remedial';
+                }
+                if (examDetails.specialization) {
+                    courseDetailsString += ` ${examDetails.specialization}`;
+                }
+                courseDetailsString += ` ${examDetails.semester} - ${examDetails.academicYear}`;
+                
+                doc.text(courseDetailsString, pageWidth - 15, 20, { align: "right" });
                 headerEndY = Math.max(headerEndY, 25);
                 
                 startY = headerEndY + 5;
 
-                // --- Details Table ---
                 const startEnrollment = students.length > 0 ? (students[0][state.enrollmentNoKey] || '') : '';
                 const endEnrollment = students.length > 0 ? (students[students.length - 1][state.enrollmentNoKey] || '') : '';
                 const enrollmentRange = `ENROLLMENT NO: FROM ${startEnrollment} TO ${endEnrollment}`;
@@ -750,7 +785,6 @@
                     columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 45 }, 2: { cellWidth: 'auto' } },
                 });
                 
-                // --- Student Table ---
                 const studentTableData = students.map((student, index) => [
                     (index + 1), student[state.enrollmentNoKey] || '', student[state.studentNameKey] || '', ''
                 ]);
@@ -765,7 +799,6 @@
                     columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 30 }, 2: { cellWidth: 60, halign: 'left' }, 3: { cellWidth: 'auto' } }
                 });
 
-                // --- Footer Section ---
                 let finalY = doc.autoTable.previous.finalY;
                 const pageHeight = doc.internal.pageSize.getHeight();
                 const requiredFooterHeight = 75;
@@ -845,7 +878,6 @@
                     };
                 } catch (error) {
                     console.warn('Could not preload local logo:', error);
-                    // logoBase64 will remain null, and the PDF will use text fallback
                 }
             }
 
