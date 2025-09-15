@@ -13,7 +13,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        .app-container { max-width: 960px; margin: 2rem auto; }
+        .app-container { max-width: 960px; margin: 1rem auto; }
         .step-section { transition: all 0.3s ease; border: 1px solid #e2e8f0; }
         .step-header { font-weight: 700; font-size: 1.5rem; color: #1e293b; margin-bottom: 1rem; }
         input[type="file"] { display: none; }
@@ -66,8 +66,9 @@
         }
     </style>
 </head>
-<body class="p-4">
-    <div class="app-container bg-white p-6 sm:p-10 rounded-2xl shadow-lg">
+<body class="p-2 sm:p-4">
+    <div class="app-container bg-white p-4 sm:p-8 rounded-2xl shadow-lg">
+        <img id="site-banner" src="site_banner.png" alt="Exam Banner" class="w-full h-auto rounded-lg mb-8 shadow-md" onerror="this.style.display='none'">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-8 text-slate-800">Attendance Sheet Creator</h1>
 
         <!-- Stepper UI -->
@@ -78,14 +79,16 @@
         </div>
 
         <!-- Step 1: Upload File -->
-        <div id="step-1" class="step-section p-6 rounded-lg">
+        <div id="step-1" class="step-section p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 1: Upload Student Data</div>
-            <p class="text-slate-600 mb-6">Start by uploading your student list as a CSV or Excel file.</p>
-            <div class="flex items-center gap-4">
-                <label for="student-file" class="custom-file-upload">Choose File</label>
+            <p class="text-slate-600 mb-6">Upload your student list to begin. The university logo will be added automatically to the PDF.</p>
+            
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <label for="student-file" class="custom-file-upload w-full sm:w-auto text-center">Choose Student File</label>
                 <input type="file" id="student-file" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
                 <span id="file-name" class="text-slate-500 truncate">No file selected.</span>
             </div>
+
             <div id="file-status" class="status-box hidden"></div>
             
             <!-- Data Preview Section -->
@@ -100,12 +103,12 @@
             </div>
 
             <div class="flex justify-end mt-6">
-                 <button id="next-to-step2-btn" class="action-button next-button" disabled>Next →</button>
+                 <button id="next-to-step2-btn" class="action-button next-button w-full sm:w-auto" disabled>Next →</button>
             </div>
         </div>
 
         <!-- Step 2: Define Blocks -->
-        <div id="step-2" class="step-section mt-8 hidden p-6 rounded-lg">
+        <div id="step-2" class="step-section mt-8 hidden p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 2: Define Exam Blocks</div>
             <p class="text-slate-600 mb-6">Allocate students into blocks. You can create one special block for a specific enrollment range, and then allocate the rest by count.</p>
 
@@ -135,7 +138,7 @@
                  <div id="range-block-status" class="status-box hidden"></div>
             </div>
             
-            <div class="summary-box mb-6">
+            <div class="summary-box mb-6 text-sm sm:text-base">
                 Total Students: <span id="total-students-original">0</span> | 
                 Students to Allocate: <span id="total-students-to-allocate">0</span>
             </div>
@@ -144,16 +147,16 @@
             <h3 class="font-semibold text-lg text-slate-800 mb-3">Allocate Remaining Students by Count</h3>
             <div id="blocks-container"></div>
             <div class="flex items-center justify-between mt-6">
-                <button id="add-block" class="action-button bg-gray-200 text-slate-700 hover:bg-gray-300">+ Add Block</button>
+                <button id="add-block" class="action-button bg-gray-200 text-slate-700 hover:bg-gray-300 text-sm sm:text-base">+ Add Block</button>
                 <div id="student-count-status" class="status-box hidden p-2 text-sm mt-0"></div>
             </div>
             <div class="flex justify-end mt-8">
-                <button id="next-to-step3-btn" class="action-button next-button" disabled>Next →</button>
+                <button id="next-to-step3-btn" class="action-button next-button w-full sm:w-auto" disabled>Next →</button>
             </div>
         </div>
 
         <!-- Step 3: Enter Exam Details -->
-        <div id="step-3" class="step-section mt-8 hidden p-6 rounded-lg">
+        <div id="step-3" class="step-section mt-8 hidden p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 3: Enter Exam Details</div>
             <p class="text-slate-600 mb-6">Provide the general details that will appear on every sheet.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -208,11 +211,15 @@
                 <label for="combine-pdf" class="ml-2 block text-sm text-slate-800 font-medium">Combine all sheets into a single PDF file</label>
             </div>
 
-            <div class="flex justify-between mt-8">
-                 <button id="reset-btn" class="action-button bg-gray-200 text-slate-700 hover:bg-gray-300">Start Over</button>
-                <button id="generate-btn" class="action-button next-button">Generate PDF(s)</button>
+            <div class="flex flex-col-reverse sm:flex-row justify-between mt-8 gap-4">
+                 <button id="reset-btn" class="action-button bg-gray-200 text-slate-700 hover:bg-gray-300 w-full sm:w-auto">Start Over</button>
+                <button id="generate-btn" class="action-button next-button w-full sm:w-auto">Generate PDF(s)</button>
             </div>
         </div>
+
+        <footer class="text-center mt-10 text-xs text-slate-500">
+            <p>Created by Neel Patel</p>
+        </footer>
     </div>
     
     <!-- Loading Overlay -->
@@ -263,6 +270,7 @@
                 blockCount: 0,
                 rawHeaders: [],
                 tempJsonData: [],
+                logoBase64: null,
             };
 
             // DOM elements
@@ -644,19 +652,19 @@
 
                     if (isCombineChecked) {
                         const doc = new jsPDF('p', 'mm', 'a4');
-                        allBlockStudents.forEach((blockData, index) => {
-                            drawPageOnDoc(doc, blockData.students, blockData.details);
-                            if (index < allBlockStudents.length - 1) {
+                        for (let i = 0; i < allBlockStudents.length; i++) {
+                            await drawPageOnDoc(doc, allBlockStudents[i].students, allBlockStudents[i].details);
+                            if (i < allBlockStudents.length - 1) {
                                 doc.addPage();
                             }
-                        });
+                        }
                         doc.save('Combined_Attendance_Sheets.pdf');
                     } else {
-                         allBlockStudents.forEach((blockData) => {
+                         for (const blockData of allBlockStudents) {
                             const doc = new jsPDF('p', 'mm', 'a4');
-                            drawPageOnDoc(doc, blockData.students, blockData.details);
+                            await drawPageOnDoc(doc, blockData.students, blockData.details);
                             doc.save(`Attendance_Sheet_Block_${blockData.details.blockNo}.pdf`);
-                        });
+                        }
                     }
                     showStatus(ui.fileStatus, 'Your PDF(s) have been generated successfully!', 'success');
                 } catch (error) {
@@ -678,26 +686,54 @@
                 };
             }
 
-            function drawPageOnDoc(doc, students, examDetails) {
-                let startY = 15;
+            async function drawPageOnDoc(doc, students, examDetails) {
                 const pageWidth = doc.internal.pageSize.getWidth();
-                const universityName = "ITM SLS BARODA UNIVERSITY";
-                const tagline = '"Think Big - Think Beyond"';
+                let startY;
 
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(10);
-                doc.text(universityName, 15, startY);
-                doc.setFont("helvetica", "italic");
-                doc.setFontSize(8);
-                doc.text(tagline, 15, startY + 4);
-
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(10);
-                doc.text("Attendance Sheet", pageWidth - 15, startY, { align: "right" });
-                doc.text(`${examDetails.branch} ${examDetails.semester} - ${examDetails.academicYear}`, pageWidth - 15, startY + 5, { align: "right" });
+                // --- Header Section ---
+                let headerEndY = 10;
                 
-                startY += 10;
+                const addLogoPromise = new Promise((resolve) => {
+                    if (state.logoBase64) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const imgWidth = 30;
+                            const imgHeight = (this.height / this.width) * imgWidth;
+                            if(imgHeight > 0 && imgWidth > 0){
+                                doc.addImage(state.logoBase64, 'PNG', 15, 10, imgWidth, imgHeight);
+                                headerEndY = 10 + imgHeight;
+                            } else {
+                                const universityName = "ITM SLS BARODA UNIVERSITY";
+                                doc.setFont("helvetica", "bold").setFontSize(10).text(universityName, 15, 15);
+                                headerEndY = 20;
+                            }
+                            resolve();
+                        };
+                        img.onerror = function() {
+                            const universityName = "ITM SLS BARODA UNIVERSITY";
+                            doc.setFont("helvetica", "bold").setFontSize(10).text(universityName, 15, 15);
+                            headerEndY = 20;
+                            resolve();
+                        };
+                        img.src = state.logoBase64;
+                    } else {
+                        const universityName = "ITM SLS BARODA UNIVERSITY";
+                        doc.setFont("helvetica", "bold").setFontSize(10).text(universityName, 15, 15);
+                        headerEndY = 20;
+                        resolve();
+                    }
+                });
 
+                await addLogoPromise;
+                
+                doc.setFont("helvetica", "normal").setFontSize(10);
+                doc.text("Attendance Sheet", pageWidth - 15, 15, { align: "right" });
+                doc.text(`${examDetails.branch} ${examDetails.semester} - ${examDetails.academicYear}`, pageWidth - 15, 20, { align: "right" });
+                headerEndY = Math.max(headerEndY, 25);
+                
+                startY = headerEndY + 5;
+
+                // --- Details Table ---
                 const startEnrollment = students.length > 0 ? (students[0][state.enrollmentNoKey] || '') : '';
                 const endEnrollment = students.length > 0 ? (students[students.length - 1][state.enrollmentNoKey] || '') : '';
                 const enrollmentRange = `ENROLLMENT NO: FROM ${startEnrollment} TO ${endEnrollment}`;
@@ -714,6 +750,7 @@
                     columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 45 }, 2: { cellWidth: 'auto' } },
                 });
                 
+                // --- Student Table ---
                 const studentTableData = students.map((student, index) => [
                     (index + 1), student[state.enrollmentNoKey] || '', student[state.studentNameKey] || '', ''
                 ]);
@@ -728,6 +765,7 @@
                     columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 30 }, 2: { cellWidth: 60, halign: 'left' }, 3: { cellWidth: 'auto' } }
                 });
 
+                // --- Footer Section ---
                 let finalY = doc.autoTable.previous.finalY;
                 const pageHeight = doc.internal.pageSize.getHeight();
                 const requiredFooterHeight = 75;
@@ -793,15 +831,32 @@
                     defaultDate: new Date()
                 });
             }
+            
+            async function preloadLogo() {
+                try {
+                    const response = await fetch('itmbu_logo.png');
+                    if (!response.ok) throw new Error('Logo not found at ./itmbu_logo.png');
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = () => {
+                        state.logoBase64 = reader.result;
+                        console.log('Local logo preloaded successfully.');
+                    };
+                } catch (error) {
+                    console.warn('Could not preload local logo:', error);
+                    // logoBase64 will remain null, and the PDF will use text fallback
+                }
+            }
+
 
             // Initial setup
             populateAcademicYears();
             initializePickers();
+            preloadLogo();
             navigateToStep(1);
         });
     </script>
 </body>
 </html>
-
-
 
