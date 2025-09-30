@@ -71,12 +71,14 @@
         <img id="site-banner" src="site_banner.png" alt="Exam Banner" class="w-full h-auto rounded-lg mb-8 shadow-md" onerror="this.style.display='none'">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-8 text-slate-800">Attendance Sheet Creator</h1>
 
+        <!-- Stepper UI -->
         <div class="stepper mb-10">
             <div id="stepper-1" class="step"><div class="step-circle">1</div><div class="step-label">Upload Data</div></div>
             <div id="stepper-2" class="step"><div class="step-circle">2</div><div class="step-label">Define Blocks</div></div>
             <div id="stepper-3" class="step"><div class="step-circle">3</div><div class="step-label">Exam Details</div></div>
         </div>
 
+        <!-- Step 1: Upload File -->
         <div id="step-1" class="step-section p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 1: Upload Student Data</div>
             <p class="text-slate-600 mb-6">Upload your student list to begin. The university logo will be added automatically to the PDF.</p>
@@ -101,6 +103,7 @@
 
             <div id="file-status" class="status-box hidden"></div>
             
+            <!-- Data Preview Section -->
             <div id="data-preview-section" class="hidden mt-6">
                 <h3 class="text-lg font-semibold text-slate-700 mb-2">Data Preview</h3>
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
@@ -116,10 +119,12 @@
             </div>
         </div>
 
+        <!-- Step 2: Define Blocks -->
         <div id="step-2" class="step-section mt-8 hidden p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 2: Define Exam Blocks</div>
             <p class="text-slate-600 mb-6">Allocate students into blocks. You can create one special block for a specific enrollment range, and then allocate the rest by count.</p>
 
+            <!-- Toggle for Optional Range Block Section -->
             <div id="show-range-block-container" class="mb-6 text-center border border-dashed border-gray-300 p-4 rounded-lg hover:border-indigo-400 transition-colors cursor-pointer">
                 <button id="show-range-block-btn" class="text-indigo-600 font-semibold w-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -129,6 +134,7 @@
                 </button>
             </div>
 
+            <!-- Optional Range Block Section (Hidden by default) -->
             <div id="range-block-section" class="hidden mb-8 p-4 border border-dashed border-indigo-300 rounded-lg bg-indigo-50">
                 <h3 class="font-semibold text-lg text-indigo-800 mb-3">Optional: Create a Block by Enrollment Range</h3>
                 <div id="range-block-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -161,6 +167,7 @@
             </div>
         </div>
 
+        <!-- Step 3: Enter Exam Details -->
         <div id="step-3" class="step-section mt-8 hidden p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 3: Enter Exam Details</div>
             <p class="text-slate-600 mb-6">Provide the general details that will appear on every sheet.</p>
@@ -231,6 +238,7 @@
         </footer>
     </div>
     
+    <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-60 items-center justify-center hidden z-50">
         <div class="text-white text-center">
             <svg class="animate-spin h-10 w-10 text-white mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -242,6 +250,7 @@
         </div>
     </div>
 
+    <!-- Column Mapping Modal -->
     <div id="mapping-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 class="text-xl font-bold text-slate-800 mb-4">Map Your Data Columns</h2>
@@ -757,13 +766,14 @@
                 
                 doc.text(courseDetailsString, pageWidth - 15, 20, { align: "right" });
                 headerEndY = Math.max(headerEndY, 25);
-
+                
                 // Draw the divider line
                 const lineY = headerEndY + 2;
                 doc.setDrawColor(0, 0, 0); // Black color
+                doc.setLineWidth(0.2);
                 doc.line(15, lineY, pageWidth - 15, lineY); // fromX, fromY, toX, toY
                 
-                startY = headerEndY + 5;
+                startY = lineY + 3;
 
                 const startEnrollment = students.length > 0 ? (students[0][state.enrollmentNoKey] || '') : '';
                 const endEnrollment = students.length > 0 ? (students[students.length - 1][state.enrollmentNoKey] || '') : '';
@@ -773,6 +783,7 @@
                     startY: startY,
                     theme: 'grid',
                     styles: { fontSize: 9, cellPadding: 1.5, lineWidth: 0.1, lineColor: [0, 0, 0], valign: 'middle', textColor: [0, 0, 0] },
+                    headStyles: { lineColor: [0, 0, 0] },
                     body: [
                         [{ content: `CENTRE: SOCSET` }, { content: `BLOCK NO: ${examDetails.blockNo}` }, { content: `DATE: ${examDetails.examDate} | TIME: ${examDetails.examTime}`, styles: { halign: 'left' } }],
                         [{ content: `EXAM CENTRE: ${examDetails.center}` }, { content: `COURSE: ${examDetails.courseCode} - ${examDetails.courseName}`, colSpan: 2, styles: { cellWidth: 'wrap' } }],
