@@ -71,14 +71,12 @@
         <img id="site-banner" src="site_banner.png" alt="Exam Banner" class="w-full h-auto rounded-lg mb-8 shadow-md" onerror="this.style.display='none'">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-8 text-slate-800">Attendance Sheet Creator</h1>
 
-        <!-- Stepper UI -->
         <div class="stepper mb-10">
             <div id="stepper-1" class="step"><div class="step-circle">1</div><div class="step-label">Upload Data</div></div>
             <div id="stepper-2" class="step"><div class="step-circle">2</div><div class="step-label">Define Blocks</div></div>
             <div id="stepper-3" class="step"><div class="step-circle">3</div><div class="step-label">Exam Details</div></div>
         </div>
 
-        <!-- Step 1: Upload File -->
         <div id="step-1" class="step-section p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 1: Upload Student Data</div>
             <p class="text-slate-600 mb-6">Upload your student list to begin. The university logo will be added automatically to the PDF.</p>
@@ -103,7 +101,6 @@
 
             <div id="file-status" class="status-box hidden"></div>
             
-            <!-- Data Preview Section -->
             <div id="data-preview-section" class="hidden mt-6">
                 <h3 class="text-lg font-semibold text-slate-700 mb-2">Data Preview</h3>
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
@@ -119,12 +116,10 @@
             </div>
         </div>
 
-        <!-- Step 2: Define Blocks -->
         <div id="step-2" class="step-section mt-8 hidden p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 2: Define Exam Blocks</div>
             <p class="text-slate-600 mb-6">Allocate students into blocks. You can create one special block for a specific enrollment range, and then allocate the rest by count.</p>
 
-            <!-- Toggle for Optional Range Block Section -->
             <div id="show-range-block-container" class="mb-6 text-center border border-dashed border-gray-300 p-4 rounded-lg hover:border-indigo-400 transition-colors cursor-pointer">
                 <button id="show-range-block-btn" class="text-indigo-600 font-semibold w-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -134,7 +129,6 @@
                 </button>
             </div>
 
-            <!-- Optional Range Block Section (Hidden by default) -->
             <div id="range-block-section" class="hidden mb-8 p-4 border border-dashed border-indigo-300 rounded-lg bg-indigo-50">
                 <h3 class="font-semibold text-lg text-indigo-800 mb-3">Optional: Create a Block by Enrollment Range</h3>
                 <div id="range-block-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,7 +161,6 @@
             </div>
         </div>
 
-        <!-- Step 3: Enter Exam Details -->
         <div id="step-3" class="step-section mt-8 hidden p-4 sm:p-6 rounded-lg">
             <div class="step-header">Step 3: Enter Exam Details</div>
             <p class="text-slate-600 mb-6">Provide the general details that will appear on every sheet.</p>
@@ -238,7 +231,6 @@
         </footer>
     </div>
     
-    <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-60 items-center justify-center hidden z-50">
         <div class="text-white text-center">
             <svg class="animate-spin h-10 w-10 text-white mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -250,7 +242,6 @@
         </div>
     </div>
 
-    <!-- Column Mapping Modal -->
     <div id="mapping-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 class="text-xl font-bold text-slate-800 mb-4">Map Your Data Columns</h2>
@@ -681,17 +672,17 @@
                     if (isCombineChecked) {
                         const doc = new jsPDF('p', 'mm', 'a4');
                         for (let i = 0; i < allBlockStudents.length; i++) {
-                            await drawPageOnDoc(doc, allBlockStudents[i].students, allBlockStudents[i].details);
+                            await drawPageOnDoc(doc, allBlockStudents[i].students, allBlockStudents[i].details, i + 1, allBlockStudents.length);
                             if (i < allBlockStudents.length - 1) {
                                 doc.addPage();
                             }
                         }
                         doc.save('Combined_Attendance_Sheets.pdf');
                     } else {
-                         for (const blockData of allBlockStudents) {
+                         for (let i = 0; i < allBlockStudents.length; i++) {
                             const doc = new jsPDF('p', 'mm', 'a4');
-                            await drawPageOnDoc(doc, blockData.students, blockData.details);
-                            doc.save(`Attendance_Sheet_Block_${blockData.details.blockNo}.pdf`);
+                            await drawPageOnDoc(doc, allBlockStudents[i].students, allBlockStudents[i].details, i + 1, allBlockStudents.length);
+                            doc.save(`Attendance_Sheet_Block_${allBlockStudents[i].details.blockNo}.pdf`);
                         }
                     }
                     showStatus(ui.fileStatus, 'Your PDF(s) have been generated successfully!', 'success');
@@ -714,7 +705,7 @@
                 };
             }
 
-            async function drawPageOnDoc(doc, students, examDetails) {
+            async function drawPageOnDoc(doc, students, examDetails, currentPage, totalPages) {
                 const pageWidth = doc.internal.pageSize.getWidth();
                 let startY;
                 let headerEndY = 10;
@@ -762,7 +753,7 @@
                 if (examDetails.specialization) {
                     courseDetailsString += ` ${examDetails.specialization}`;
                 }
-                courseDetailsString += ` ${examDetails.semester} - ${examDetails.academicYear}`;
+                courseDetailsString += ` ${examDetails.semester} - ${examDetails.academicYear} (Students: ${examDetails.totalStudentsInBlock})`;
                 
                 doc.text(courseDetailsString, pageWidth - 15, 20, { align: "right" });
                 headerEndY = Math.max(headerEndY, 25);
@@ -793,17 +784,17 @@
                 });
                 
                 const studentTableData = students.map((student, index) => [
-                    (index + 1), student[state.enrollmentNoKey] || '', student[state.studentNameKey] || '', ''
+                    (index + 1), student[state.enrollmentNoKey] || '', student[state.studentNameKey] || '', '', ''
                 ]);
 
                 doc.autoTable({
                     startY: doc.autoTable.previous.finalY + 4,
-                    head: [['S.No.', 'ENROLLMENT NO.', 'NAME OF STUDENT', 'SIGNATURE']],
+                    head: [['S.No.', 'Enrollment No.', 'Name of Student', 'No. of Supplementary', 'SIGN']],
                     body: studentTableData,
                     theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 2, halign: 'center', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.1 },
                     headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.1, lineColor: [0, 0, 0] },
-                    columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 30 }, 2: { cellWidth: 60, halign: 'left' }, 3: { cellWidth: 'auto' } }
+                    columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 30 }, 2: { cellWidth: 70, halign: 'left' }, 3: { cellWidth: 30 }, 4: { cellWidth: 'auto' } }
                 });
 
                 let finalY = doc.autoTable.previous.finalY;
@@ -844,6 +835,10 @@
                 doc.text("Deputy Chief Superintendent", pageWidth / 2, signatureY + signatureLineSpacing, { align: "center" });
                 doc.text("SIGNATURE", pageWidth - 20, signatureY, { align: "right" });
                 doc.text("Chief Superintendent", pageWidth - 20, signatureY + signatureLineSpacing, { align: "right" });
+                
+                // Add Page Number Footer
+                doc.setFontSize(8);
+                doc.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
             }
 
             // --- General Utility Functions ---
