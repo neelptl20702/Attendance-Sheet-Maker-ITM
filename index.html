@@ -1290,7 +1290,7 @@
 
                 doc.autoTable({
                     startY: lineY + 3, theme: 'grid',
-                    styles: { fontSize: 9, cellPadding: 1.5, lineWidth: 0.1, lineColor: [0, 0, 0], valign: 'middle', textColor: [0, 0, 0] },
+                    styles: { fontSize: 9, cellPadding: 1.5, lineWidth: 0.3, lineColor: [0, 0, 0], valign: 'middle', textColor: [0, 0, 0] },
                     headStyles: { lineColor: [0, 0, 0] },
                     body: [
                         [{ content: `CENTRE: SOCSET` }, { content: `BLOCK NO: ${examDetails.blockNo}` }, { content: `DATE: ${examDetails.examDate} | TIME: ${examDetails.examTime}`, styles: { halign: 'left' } }],
@@ -1315,8 +1315,8 @@
 
                 doc.autoTable({
                     startY: doc.autoTable.previous.finalY + 4, head: mainTableHead, body: studentTableData, theme: 'grid',
-                    styles: { fontSize: 8, cellPadding: 2, halign: 'center', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.1 },
-                    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.1 },
+                    styles: { fontSize: 8, cellPadding: 2, halign: 'center', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.3 },
+                    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.3 },
                     columnStyles: mainTableColStyles
                 });
 
@@ -1327,8 +1327,8 @@
                 const statsTableData = [["Total No. of Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"], [examDetails.totalStudentsInBlock, "", "", "", "", ""]];
                 doc.autoTable({
                     startY: finalY + 10, head: [statsTableData[0]], body: [statsTableData[1]], theme: 'grid',
-                    styles: { fontSize: 8, halign: 'center', cellPadding: 2, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.1 },
-                    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.1 }
+                    styles: { fontSize: 8, halign: 'center', cellPadding: 2, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.3 },
+                    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.3 }
                 });
 
                 finalY = doc.autoTable.previous.finalY;
@@ -1384,3 +1384,4 @@
     </script>
 </body>
 </html>
+
