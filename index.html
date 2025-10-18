@@ -84,32 +84,6 @@
         .step.active .step-label { color: #1e293b; }
         .stepper::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 2px; background-color: #e2e8f0; transform: translateY(-50%); z-index: -1; }
         
-        /* Modal - Compacted for better UX */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(15, 23, 42, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 1.5rem; /* Reduced padding for compactness */
-            border-radius: 1rem;
-            max-width: 900px; 
-            width: 90%;
-            max-height: 90vh; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto; /* Added for scrollability to ensure preview visibility */
-        }
-
         /* Split Button Styles */
         .split-button-group {
             display: flex;
@@ -242,6 +216,77 @@
             
             <div id="file-status" class="status-box hidden"></div>
             
+            <!-- NEW: Inline Data Cleaning Section (Replaces Modal) -->
+            <div id="data-cleaning-section" class="hidden mt-8 border-t-2 border-slate-200 pt-6">
+                 <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center">
+                    <i data-lucide="ruler" class="w-6 h-6 inline-block mr-3 text-slate-600"></i>
+                    Data Cleaning & Mapping
+                </h2>
+                <p class="text-slate-600 mb-4">Review the data below. Adjust settings to correctly interpret columns and rows, then map the required fields.</p>
+
+                <!-- Configuration Controls -->
+                <div class="border border-indigo-200 p-4 rounded-lg bg-indigo-50 mb-6">
+                    <h3 class="font-semibold text-lg text-indigo-800 mb-3 flex items-center">
+                        <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                        Data Preparation Settings
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Skip Initial Rows</label>
+                            <input type="number" id="skip-rows" value="0" min="0" class="w-full" placeholder="e.g., 2" oninput="liveUpdatePreview()">
+                            <p class="text-xs text-slate-500 mt-1">Ignores blank/junk rows at the top.</p>
+                        </div>
+                        <div class="flex items-end justify-start md:col-span-2 pt-6">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="force-header-toggle" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" onchange="liveUpdatePreview()">
+                                <label for="force-header-toggle" class="ml-2 block text-sm text-slate-800 font-medium">Force First Visible Row as Header</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Preview Grid -->
+                <h3 class="text-lg font-semibold text-slate-700 mb-2 flex items-center justify-between">
+                    <span class="flex items-center">
+                        <i data-lucide="table" class="w-4 h-4 mr-1"></i>
+                        Live Data Preview (Top 15 Rows)
+                    </span>
+                    <span id="preview-interpretation" class="text-xs font-medium px-2 py-1 rounded-full bg-gray-200 text-gray-700"></span>
+                </h3>
+                <div class="overflow-x-auto rounded-lg border border-slate-200 mb-6" style="max-height: 280px;">
+                    <table id="live-preview-table" class="min-w-full divide-y divide-slate-200 text-xs">
+                        <thead class="bg-slate-100 sticky top-0 z-10"></thead>
+                        <tbody class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+
+                <!-- Final Mapping Controls -->
+                <div class="p-5 rounded-xl border-2 border-green-300 bg-green-50 shadow-md">
+                    <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+                        <i data-lucide="map" class="w-5 h-5 mr-2"></i>
+                        Required Column Mapping
+                    </h3>
+                    <p class="text-sm text-green-700 mb-4">Please select the correct columns for **Enrollment Number** and **Student Name** from your file. This is mandatory to proceed.</p>
+                    <div class="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label for="enrollment-map" class="block text-sm font-medium text-green-800 mb-1 font-bold">Enrollment Number Column</label>
+                            <select id="enrollment-map"></select>
+                        </div>
+                         <div class="input-group">
+                            <label for="name-map" class="block text-sm font-medium text-green-800 mb-1 font-bold">Student Name Column</label>
+                            <select id="name-map"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end mt-8">
+                    <button id="confirm-cleaning-btn" class="action-button next-button">
+                        Confirm Mapping & Continue to Step 2
+                        <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
             <div id="data-preview-section" class="hidden mt-6">
                 <h3 class="text-lg font-semibold text-slate-700 mb-2">Data Preview (Mapped Columns)</h3>
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
@@ -418,82 +463,6 @@
         </div>
     </div>
 
-    <!-- NEW: Data Cleaning & Preview Modal (UX IMPROVED) -->
-    <div id="data-cleaning-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center">
-                <i data-lucide="ruler" class="w-6 h-6 inline-block mr-3 text-slate-600"></i>
-                Data Cleaning & Mapping (Step 1 Review)
-            </h2>
-            <p class="text-slate-600 mb-4">Review the inferred data structure below. Adjust the settings to ensure the columns and rows are correctly interpreted before mapping the required fields.</p>
-
-            <!-- Configuration Controls -->
-            <div class="border border-indigo-200 p-4 rounded-lg bg-indigo-50 mb-6">
-                <h3 class="font-semibold text-lg text-indigo-800 mb-3 flex items-center">
-                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                    Data Preparation Settings
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    <div class="input-group">
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Skip Initial Rows</label>
-                        <input type="number" id="skip-rows" value="0" min="0" class="w-full" placeholder="e.g., 2" oninput="liveUpdatePreview()">
-                        <p class="text-xs text-slate-500 mt-1">Ignores blank/junk rows at the top.</p>
-                    </div>
-                    
-                    <div class="flex items-end justify-start md:col-span-2 pt-6">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="force-header-toggle" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" onchange="liveUpdatePreview()">
-                            <label for="force-header-toggle" class="ml-2 block text-sm text-slate-800 font-medium">Force First Visible Row as Header</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Live Preview Grid -->
-            <h3 class="text-lg font-semibold text-slate-700 mb-2 flex items-center justify-between">
-                <span class="flex items-center">
-                    <i data-lucide="table" class="w-4 h-4 mr-1"></i>
-                    Live Data Preview (Top 15 Rows)
-                </span>
-                <span id="preview-interpretation" class="text-xs font-medium px-2 py-1 rounded-full bg-gray-200 text-gray-700"></span>
-            </h3>
-            <div class="overflow-x-auto rounded-lg border border-slate-200 mb-6 flex-grow" style="max-height: 280px;">
-                <table id="live-preview-table" class="min-w-full divide-y divide-slate-200 text-xs">
-                    <thead class="bg-slate-100 sticky top-0 z-10"></thead>
-                    <tbody class="divide-y divide-slate-100"></tbody>
-                </table>
-            </div>
-
-            <!-- Final Mapping Controls -->
-            <div class="p-5 rounded-xl border-2 border-green-300 bg-green-50 shadow-md">
-                <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
-                    <i data-lucide="map" class="w-5 h-5 mr-2"></i>
-                    Required Column Mapping
-                </h3>
-                <p class="text-sm text-green-700 mb-4">Please select the correct column names from your file for **Enrollment Number** and **Student Name**. This is mandatory to proceed to the next step.</p>
-
-                <div class="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="input-group">
-                        <label for="enrollment-map" class="block text-sm font-medium text-green-800 mb-1 font-bold">Enrollment Number Column</label>
-                        <select id="enrollment-map"></select>
-                    </div>
-                     <div class="input-group">
-                        <label for="name-map" class="block text-sm font-medium text-green-800 mb-1 font-bold">Student Name Column</label>
-                        <select id="name-map"></select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-end mt-8">
-                <button id="confirm-cleaning-btn" class="action-button next-button">
-                    Confirm Mapping & Continue
-                    <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -537,18 +506,21 @@
                 totalStudentsToAllocate: document.getElementById('total-students-to-allocate'),
                 resetBtn: document.getElementById('reset-btn'),
                 loadingOverlay: document.getElementById('loading-overlay'),
-                dataCleaningModal: document.getElementById('data-cleaning-modal'), // NEW ID
+                
+                // UPDATED: No longer a modal, but the inline section
+                dataCleaningSection: document.getElementById('data-cleaning-section'), 
                 enrollmentMap: document.getElementById('enrollment-map'),
                 nameMap: document.getElementById('name-map'),
-                confirmCleaningBtn: document.getElementById('confirm-cleaning-btn'), // NEW ID
+                confirmCleaningBtn: document.getElementById('confirm-cleaning-btn'),
+                
                 dataPreviewSection: document.getElementById('data-preview-section'),
                 previewTable: document.getElementById('preview-table'),
                 showRangeBlockContainer: document.getElementById('show-range-block-container'),
                 showRangeBlockBtn: document.getElementById('show-range-block-btn'),
-                livePreviewTable: document.getElementById('live-preview-table'), // NEW
-                skipRowsInput: document.getElementById('skip-rows'), // NEW
-                forceHeaderToggle: document.getElementById('force-header-toggle'), // NEW
-                previewInterpretation: document.getElementById('preview-interpretation'), // NEW
+                livePreviewTable: document.getElementById('live-preview-table'),
+                skipRowsInput: document.getElementById('skip-rows'),
+                forceHeaderToggle: document.getElementById('force-header-toggle'),
+                previewInterpretation: document.getElementById('preview-interpretation'),
 
                 rangeBlock: {
                     section: document.getElementById('range-block-section'),
@@ -692,6 +664,13 @@
                         step.classList.add('active');
                     }
                 });
+
+                // NEW: Logic to reset Step 1 view when navigating back to it
+                if (stepNumber === 1 && !state.isBlankSheet) {
+                    ui.fileUploadContent.classList.remove('hidden');
+                    ui.nextToStep2Btn.parentElement.classList.remove('hidden');
+                    ui.dataCleaningSection.classList.add('hidden');
+                }
                 
                 lucide.createIcons();
 
@@ -734,7 +713,7 @@
                 
                 ui.fileUploadContent.classList.toggle('hidden', isBlank);
                 ui.blankSheetContent.classList.toggle('hidden', !isBlank);
-                ui.nextToStep2Btn.classList.toggle('hidden', isBlank);
+                ui.nextToStep2Btn.parentElement.classList.toggle('hidden', isBlank);
                 ui.nextToStep2BlankBtn.classList.toggle('hidden', !isBlank);
                 
                 ui.modeFileBtn.classList.toggle('active', !isBlank);
@@ -746,6 +725,8 @@
                 } else {
                      ui.nextToStep2Btn.disabled = true;
                 }
+                 // Always hide the cleaning section on mode toggle
+                ui.dataCleaningSection.classList.add('hidden');
                 
                 lucide.createIcons();
             }
@@ -797,32 +778,26 @@
             }
 
 
-            // --- Step 1: File Handling & Data Cleaning Modal Logic ---
+            // --- Step 1: File Handling & Data Cleaning Logic (Inline) ---
             
-            // Function to parse raw AoA based on current modal controls
+            // Function to parse raw AoA based on current controls
             function parseAoA(rawAoA, skipRows, isHeaderForced) {
                 if (rawAoA.length === 0) return { data: [], headers: [] };
 
                 let dataRows = rawAoA.slice(skipRows);
 
-                // --- BUG FIX START ---
-                // Find the first row that actually contains data to prevent errors with leading blank rows
+                // Find the first row that actually contains data
                 let firstMeaningfulRowIndex = -1;
                 for(let i = 0; i < dataRows.length; i++) {
-                    // Check if any cell in the row has content
                     if (dataRows[i].some(cell => cell !== null && cell !== undefined && String(cell).trim() !== '')) {
                         firstMeaningfulRowIndex = i;
                         break;
                     }
                 }
 
-                // If no data is found in any row, return empty
                 if (firstMeaningfulRowIndex === -1) return { data: [], headers: [] };
                 
-                // Adjust dataRows to start from the first row with actual content
                 dataRows = dataRows.slice(firstMeaningfulRowIndex);
-                // --- BUG FIX END ---
-                
                 if (dataRows.length === 0) return { data: [], headers: [] };
                 
                 let headerRow = [];
@@ -832,13 +807,11 @@
                     headerRow = dataRows[0];
                     studentDataAoA = dataRows.slice(1);
                 } else {
-                    // This is now safe because dataRows[0] is guaranteed to be a non-empty row
                     const columnsCount = dataRows[0].length;
                     headerRow = Array.from({ length: columnsCount }, (_, i) => `Column ${String.fromCharCode(65 + i)}`);
                     studentDataAoA = dataRows;
                 }
 
-                // 2. Sanitize Headers
                 const sanitizedHeaders = {};
                 const headers = headerRow.map((h, i) => {
                      let header = String(h || '').trim();
@@ -852,7 +825,6 @@
                      return uniqueHeader;
                 });
                 
-                // 3. Convert to JSON and filter empty rows
                 const jsonData = studentDataAoA.map(row => {
                     const obj = {};
                     headers.forEach((h, i) => {
@@ -860,21 +832,18 @@
                     });
                     return obj;
                 }).filter(row => {
-                    // Only keep rows that have at least one non-empty value
                     return Object.values(row).some(v => v !== undefined && v !== null && String(v).trim() !== '');
                 });
 
                 return { data: jsonData, headers: headers };
             }
 
-            // Expose to global scope for inline HTML oninput attribute
             function liveUpdatePreview() {
                 const skipRows = parseInt(ui.skipRowsInput.value) || 0;
                 const isHeaderForced = ui.forceHeaderToggle.checked;
                 
                 const { data: currentJsonData, headers: currentHeaders } = parseAoA(state.rawAoA, skipRows, isHeaderForced);
 
-                // Update headers in the mapping selects
                 ui.enrollmentMap.innerHTML = '';
                 ui.nameMap.innerHTML = '';
                 currentHeaders.forEach(header => {
@@ -883,18 +852,13 @@
                     ui.nameMap.add(option.cloneNode(true));
                 });
                 
-                // --- Update Live Preview Table ---
                 const thead = ui.livePreviewTable.querySelector('thead');
                 const tbody = ui.livePreviewTable.querySelector('tbody');
-                
                 thead.innerHTML = '';
                 tbody.innerHTML = '';
-
-                // Create header row
                 const headerRowHtml = currentHeaders.map(h => `<th class="px-4 py-2 text-left font-bold text-slate-800">${h}</th>`).join('');
                 thead.innerHTML = `<tr>${headerRowHtml}</tr>`;
 
-                // Create data rows
                 currentJsonData.slice(0, 15).forEach((row, rowIndex) => {
                     const tr = document.createElement('tr');
                     tr.className = rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50';
@@ -903,7 +867,6 @@
                     tbody.appendChild(tr);
                 });
                 
-                // Update interpretation text (New UI feature)
                 if (isHeaderForced) {
                     ui.previewInterpretation.textContent = "First row interpreted as Header";
                     ui.previewInterpretation.className = "text-xs font-medium px-2 py-1 rounded-full bg-green-200 text-green-700";
@@ -912,7 +875,6 @@
                     ui.previewInterpretation.className = "text-xs font-medium px-2 py-1 rounded-full bg-yellow-200 text-yellow-700";
                 }
 
-                // If data exists, attempt to auto-select mapping
                 if (currentHeaders.length > 0) {
                     const autoEnrollment = window.findHeader(currentHeaders, ['enrollment no', 'enrollment', 'roll no', 'roll', 'enr no', 'column a']);
                     const autoName = window.findHeader(currentHeaders, ['student name', 'name of student', 'name', 'full name', 'column b']);
@@ -940,7 +902,6 @@
                         const workbook = XLSX.read(data, { type: 'array' });
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
                         
-                        // 1. Read raw AoA (with header 1)
                         const aoa = XLSX.utils.sheet_to_json(sheet, { header: 1 });
                         if (aoa.length === 0) {
                             showStatus(ui.fileStatus, 'The file is empty.', 'error');
@@ -948,14 +909,15 @@
                         }
                         state.rawAoA = aoa;
                         
-                        // 2. Infer header status for initial toggle state
                         state.inferredHeaderStatus = inferHeaderStatus(aoa);
                         ui.forceHeaderToggle.checked = state.inferredHeaderStatus;
                         ui.skipRowsInput.value = '0';
-
-                        // 3. Open the powerful data cleaning modal
-                        ui.dataCleaningModal.classList.remove('hidden');
-                        window.liveUpdatePreview(); // Initial render based on inference
+                        
+                        // NEW FLOW: Hide upload UI, show cleaning UI
+                        ui.fileUploadContent.classList.add('hidden');
+                        ui.nextToStep2Btn.parentElement.classList.add('hidden');
+                        ui.dataCleaningSection.classList.remove('hidden');
+                        window.liveUpdatePreview(); 
 
                     } catch (error) {
                         showStatus(ui.fileStatus, `Error reading file: ${error.message}.`, 'error');
@@ -972,7 +934,7 @@
                 const { data: finalJsonData, headers: finalHeaders } = parseAoA(state.rawAoA, skipRows, isHeaderForced);
 
                 if (finalJsonData.length === 0) {
-                    showStatus(ui.fileStatus, 'Data extraction failed. Please review skip rows/header settings.', 'error');
+                    showStatus(ui.fileStatus, 'Data extraction failed. Review skip rows/header settings.', 'error');
                     return;
                 }
 
@@ -980,24 +942,22 @@
                 state.studentNameKey = ui.nameMap.value;
 
                 if (state.enrollmentNoKey === state.studentNameKey) {
-                    showStatus(ui.fileStatus, 'Enrollment and Name columns cannot be the same.', 'error');
-                    return;
+                    showStatus(ui.fileStatus, 'Enrollment and Name columns cannot be the same.', 'error'); return;
                 }
                 if (!state.enrollmentNoKey || !state.studentNameKey) {
-                     showStatus(ui.fileStatus, 'Please select both Enrollment and Name columns.', 'error');
-                     return;
+                     showStatus(ui.fileStatus, 'Please select both Enrollment and Name columns.', 'error'); return;
                 }
 
                 state.tempJsonData = finalJsonData;
-                state.rawHeaders = finalHeaders; // Update rawHeaders to the final set of headers
-                
+                state.rawHeaders = finalHeaders;
                 state.studentData = state.tempJsonData.map(row => ({ ...row, isAllocated: false }));
                 state.totalStudentsInFile = state.studentData.length;
                 showStatus(ui.fileStatus, `Successfully loaded ${state.totalStudentsInFile} students.`, 'success');
-                ui.nextToStep2Btn.disabled = false;
-                ui.dataCleaningModal.classList.add('hidden');
                 
-                displayDataPreview();
+                //displayDataPreview(); // Optional: can show a tiny summary if needed.
+                
+                // NEW: Directly navigate to step 2 on success
+                navigateToStep(2);
             }
             
             // --- Step 2: Block Management Functions ---
@@ -1016,7 +976,6 @@
                     return;
                 }
 
-                // Temporary filter for unallocated students
                 const studentsInRange = state.studentData.filter(student => {
                     const enrNo = String(student[state.enrollmentNoKey]).toUpperCase();
                     return !student.isAllocated && enrNo >= start && enrNo <= end;
@@ -1027,7 +986,6 @@
                      return;
                 }
 
-                // Reset all blocks and re-allocate for the special block
                 ui.blocksContainer.innerHTML = '';
                 state.allocatedBlocks = [];
 
@@ -1042,8 +1000,6 @@
                 };
                 
                 addBlockInput(true, blockDetails);
-
-                // Save block state immediately after creation to prevent loss on navigation
                 saveBlockState(); 
                 navigateToStep(3);
             }
@@ -1067,7 +1023,6 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 `;
 
-                // Set default center/room/block for blank sheet to prevent undefined values in PDF details
                 const defaultDetails = {
                     center: 'SOCSET',
                     roomNo: state.isBlankSheet ? `R-BLANK-${state.blockCount}` : '',
@@ -1077,13 +1032,12 @@
                 
                 const finalDetails = { ...defaultDetails, ...details };
 
-
                 if (isSpecial) {
                     blockHTML += `
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Exam Centre</label><input type="text" class="block-center" value="${finalDetails.center}" readonly></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Room No.</label><input type="text" class="block-room-no" value="${finalDetails.roomNo}" readonly></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Block No.</label><input type="text" class="block-no" value="${finalDetails.blockNo}" readonly></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">No. of Students</label><input type="number" class="block-students" value="${finalDetails.count}" readonly></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Exam Centre</label><input type="text" class="block-center bg-slate-100" value="${finalDetails.center}" readonly></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Room No.</label><input type="text" class="block-room-no bg-slate-100" value="${finalDetails.roomNo}" readonly></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Block No.</label><input type="text" class="block-no bg-slate-100" value="${finalDetails.blockNo}" readonly></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">No. of Students</label><input type="number" class="block-students bg-slate-100" value="${finalDetails.count}" readonly></div>
                     `;
                 } else {
                      blockHTML += `
@@ -1097,7 +1051,6 @@
                 blockDiv.innerHTML = blockHTML;
                 ui.blocksContainer.appendChild(blockDiv);
                 
-                // Apply auto-capitalization to new inputs if not special/readonly
                 if (!isSpecial) {
                      const newRoomNoInput = blockDiv.querySelector('.block-room-no');
                      const newBlockNoInput = blockDiv.querySelector('.block-no');
@@ -1109,8 +1062,6 @@
             }
 
             function updateStudentCountStatus() {
-                // Expose to global scope for inline HTML onclick attribute
-                
                 if (state.isBlankSheet) {
                     const regularInputs = Array.from(ui.blocksContainer.querySelectorAll('.block-students:not([readonly])'));
                     state.studentsToAllocateCount = regularInputs.reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
@@ -1132,8 +1083,6 @@
                     return; 
                 }
                 
-                // --- File Upload Mode Logic ---
-                
                 state.studentsToAllocateCount = state.studentData.filter(s => !s.isAllocated).length;
                 ui.totalStudentsToAllocate.textContent = state.studentsToAllocateCount;
                 
@@ -1149,9 +1098,8 @@
                 } else if (totalInRegularBlocks === state.studentsToAllocateCount) {
                     ui.studentCountStatus.className = 'status-box status-success p-2 text-sm mt-0';
                     ui.studentCountStatus.textContent = `Allocated: ${totalInRegularBlocks} (Perfect!)`;
-                    // Enable next if we allocated all remaining OR if the only remaining students are in a special block
                     const isSpecialBlockPresent = ui.blocksContainer.querySelector('.block-students[readonly]');
-                    if (totalInRegularBlocks === state.studentsToAllocateCount && (totalInRegularBlocks > 0 || isSpecialBlockPresent)) {
+                    if (totalInRegularBlocks > 0 || isSpecialBlockPresent) {
                          ui.nextToStep3Btn.disabled = false;
                     }
                 } else {
@@ -1159,7 +1107,6 @@
                     ui.studentCountStatus.textContent = `Allocated: ${totalInRegularBlocks} (Remaining: ${state.studentsToAllocateCount - totalInRegularBlocks})`;
                 }
 
-                // Enable next if all students are accounted for (either by regular blocks or if there's a special block and no remaining students needed)
                 const isSpecialBlockPresent = ui.blocksContainer.querySelector('.block-students[readonly]');
                 if (totalInRegularBlocks === state.studentsToAllocateCount && (totalInRegularBlocks > 0 || isSpecialBlockPresent)) {
                     ui.nextToStep3Btn.disabled = false;
@@ -1173,8 +1120,6 @@
                     ui.studentCountStatus.classList.add('hidden');
                 }
             }
-            
-            // --- Other General Utility Functions (Omitted for brevity) ---
             
             function populateAcademicYears() {
                 const yearSelect = ui.examDetails.academicYear;
@@ -1192,31 +1137,6 @@
                 }
             }
 
-
-            function displayDataPreview() {
-                ui.dataPreviewSection.classList.remove('hidden');
-                const thead = ui.previewTable.querySelector('thead');
-                const tbody = ui.previewTable.querySelector('tbody');
-                
-                thead.innerHTML = `
-                    <tr class="text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                        <th class="px-4 py-2">${state.enrollmentNoKey}</th>
-                        <th class="px-4 py-2">${state.studentNameKey}</th>
-                    </tr>`;
-                
-                tbody.innerHTML = '';
-                const previewData = state.studentData.slice(0, 5);
-                previewData.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'bg-white divide-y divide-slate-200';
-                    tr.innerHTML = `
-                        <td class="px-4 py-2 whitespace-nowrap text-slate-700">${row[state.enrollmentNoKey] || ''}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-slate-700">${row[state.studentNameKey] || ''}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
             function getBlockDetails(blockElement, studentCount, generalDetails) {
                  return {
                     ...generalDetails,
@@ -1231,21 +1151,15 @@
             // --- PDF Generation Functions ---
             
             async function generateSheets(combineMode) {
-                // Validation (omitted for brevity, assume valid inputs)
                 const inputElements = document.querySelectorAll('#step-3 input:not([type="checkbox"]), #step-3 select');
                 inputElements.forEach(el => el.classList.remove('input-error'));
                 
                 const generalDetails = {
-                    branch: ui.examDetails.branch.value,
-                    semester: ui.examDetails.semester.value,
-                    academicYear: ui.examDetails.academicYear.value,
-                    courseCode: ui.examDetails.courseCode.value,
-                    courseName: ui.examDetails.courseName.value,
-                    specialization: ui.examDetails.specialization.value,
-                    examDate: ui.examDetails.examDate.value,
-                    examTime: ui.examDetails.examTime.value,
-                    isRemedial: ui.examDetails.isRemedialExam.checked,
-                    includeSubjectColumn: ui.examDetails.includeSubjectColumn.checked
+                    branch: ui.examDetails.branch.value, semester: ui.examDetails.semester.value,
+                    academicYear: ui.examDetails.academicYear.value, courseCode: ui.examDetails.courseCode.value,
+                    courseName: ui.examDetails.courseName.value, specialization: ui.examDetails.specialization.value,
+                    examDate: ui.examDetails.examDate.value, examTime: ui.examDetails.examTime.value,
+                    isRemedial: ui.examDetails.isRemedialExam.checked, includeSubjectColumn: ui.examDetails.includeSubjectColumn.checked
                 };
                 
                 let allDetailsFilled = true;
@@ -1268,21 +1182,15 @@
                 ui.loadingOverlay.classList.add('flex');
                 
                 try {
-                    const blockElements = ui.blocksContainer.querySelectorAll('.block-item');
                     const allBlockStudents = [];
-                    
-                    if (blockElements.length === 0) {
-                         throw new Error("No blocks have been defined in Step 2.");
-                    }
+                    if (state.allocatedBlocks.length === 0) throw new Error("No blocks have been defined in Step 2.");
                     
                     if (!state.isBlankSheet) {
                         state.studentData.forEach(s => s.isAllocated = false);
                         const specialBlock = state.allocatedBlocks.find(b => b.isSpecial);
                         if (specialBlock) {
                             state.studentData.forEach(s => {
-                                if (specialBlock.studentEnrollments.includes(s[state.enrollmentNoKey])) {
-                                    s.isAllocated = true;
-                                }
+                                if (specialBlock.studentEnrollments.includes(s[state.enrollmentNoKey])) { s.isAllocated = true; }
                             });
                         }
                     }
@@ -1293,36 +1201,27 @@
 
                     state.allocatedBlocks.forEach(savedBlock => {
                         const count = savedBlock.count;
-                        // Use getBlockDetails exposed to window
-                        const blockDetails = window.getBlockDetails(document.getElementById('blocks-container'), count, generalDetails); 
                         
                         if (state.isBlankSheet) {
-                            const blankStudents = Array(count).fill(null).map(() => ({
-                                [state.enrollmentNoKey]: '', 
-                                [state.studentNameKey]: ''  
-                            }));
-                            allBlockStudents.push({ students: blankStudents, details: { ...generalDetails, ...savedBlock } }); 
-
+                            const blankStudents = Array(count).fill(null).map(() => ({ [state.enrollmentNoKey]: '', [state.studentNameKey]: '' }));
+                            allBlockStudents.push({ students: blankStudents, details: { ...generalDetails, ...savedBlock, totalStudentsInBlock: count } }); 
                         } else if (savedBlock.isSpecial) {
                             const students = state.studentData.filter(s => savedBlock.studentEnrollments.includes(s[state.enrollmentNoKey]));
-                            allBlockStudents.push({ students, details: { ...generalDetails, ...savedBlock } });
+                            allBlockStudents.push({ students, details: { ...generalDetails, ...savedBlock, totalStudentsInBlock: count } });
                         } else {
                             const students = state.studentData.slice(studentIndexForRegularBlocks, studentIndexForRegularBlocks + count);
                             studentIndexForRegularBlocks += count;
-                            allBlockStudents.push({ students, details: { ...generalDetails, ...savedBlock } });
+                            allBlockStudents.push({ students, details: { ...generalDetails, ...savedBlock, totalStudentsInBlock: count } });
                         }
                     });
 
 
                     const isCombineChecked = (combineMode === 'combined');
-
                     if (isCombineChecked) {
                         const doc = new jsPDF('p', 'mm', 'a4');
                         for (let i = 0; i < allBlockStudents.length; i++) {
                             await drawPageOnDoc(doc, allBlockStudents[i].students, allBlockStudents[i].details, i + 1, allBlockStudents.length);
-                            if (i < allBlockStudents.length - 1) {
-                                doc.addPage();
-                            }
+                            if (i < allBlockStudents.length - 1) doc.addPage();
                         }
                         doc.save('Combined_Attendance_Sheets.pdf');
                     } else {
@@ -1351,76 +1250,46 @@
                     if (state.logoBase64) {
                         const img = new Image();
                         img.onload = function() {
-                            const imgWidth = 30;
-                            const imgHeight = (this.height / this.width) * imgWidth;
+                            const imgWidth = 30; const imgHeight = (this.height / this.width) * imgWidth;
                             if(imgHeight > 0 && imgWidth > 0){
                                 doc.addImage(state.logoBase64, 'PNG', 15, 10, imgWidth, imgHeight);
                                 headerEndY = 10 + imgHeight;
                             } else {
-                                const universityName = "ITM SLS BARODA UNIVERSITY";
-                                doc.setFont("helvetica", "bold").setFontSize(10).text(universityName, 15, 15);
-                                headerEndY = 20;
-                            }
-                            resolve();
+                                doc.setFont("helvetica", "bold").setFontSize(10).text("ITM SLS BARODA UNIVERSITY", 15, 15); headerEndY = 20;
+                            } resolve();
                         };
                         img.onerror = function() {
-                            const universityName = "ITM SLS BARODA UNIVERSITY";
-                            doc.setFont("helvetica", "bold").setFontSize(10).text(universityName, 15, 15);
-                            headerEndY = 20;
-                            resolve();
+                            doc.setFont("helvetica", "bold").setFontSize(10).text("ITM SLS BARODA UNIVERSITY", 15, 15); headerEndY = 20; resolve();
                         };
                         img.src = state.logoBase64;
                     } else {
-                        const universityName = "ITM SLS BARODA UNIVERSITY";
-                        doc.setFont("helvetica", "bold").setFontSize(10).text(universityName, 15, 15);
-                        headerEndY = 20;
-                        resolve();
+                        doc.setFont("helvetica", "bold").setFontSize(10).text("ITM SLS BARODA UNIVERSITY", 15, 15); headerEndY = 20; resolve();
                     }
                 });
-
                 await addLogoPromise;
                 
-                // --- PDF Header Formatting Update (3 Lines Total) ---
                 doc.setFont("helvetica", "normal").setFontSize(10);
-                // Line 1: Main Title
                 doc.text("Attendance Sheet", pageWidth - 15, 15, { align: "right" });
                 
-                // Line 2: Exam Details (Branch + Remedial + Specialization + Semester + Year)
                 let courseDetailsLine2 = `${examDetails.branch}`;
-                if (examDetails.isRemedial) {
-                    courseDetailsLine2 += ' REMEDIAL';
-                }
-                if (examDetails.specialization) {
-                     courseDetailsLine2 += ` ${examDetails.specialization}`;
-                }
+                if (examDetails.isRemedial) courseDetailsLine2 += ' REMEDIAL';
+                if (examDetails.specialization) courseDetailsLine2 += ` ${examDetails.specialization}`;
                 courseDetailsLine2 += ` ${examDetails.semester} - ${examDetails.academicYear}`;
-                doc.text(courseDetailsLine2, pageWidth - 15, 20, { align: "right" }); // Moved up from 25 to 20
+                doc.text(courseDetailsLine2, pageWidth - 15, 20, { align: "right" });
                 
-                // Line 3: Student Count
-                let courseDetailsLine3 = `(Students: ${examDetails.totalStudentsInBlock})`;
-                doc.text(courseDetailsLine3, pageWidth - 15, 25, { align: "right" }); // Moved up from 30 to 25
+                doc.text(`(Students: ${examDetails.totalStudentsInBlock})`, pageWidth - 15, 25, { align: "right" });
                 
-                headerEndY = Math.max(headerEndY, 30); // Max header end is now 25 + margin = 30
-                
-                // Draw the divider line
+                headerEndY = Math.max(headerEndY, 30);
                 const lineY = headerEndY + 2;
-                doc.setDrawColor(0, 0, 0); 
-                doc.setLineWidth(0.2);
+                doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.2);
                 doc.line(15, lineY, pageWidth - 15, lineY); 
                 
-                const startY = lineY + 3;
-                
-                // Get start/end enrollment (will be empty strings in blank mode)
                 const startEnrollment = students.length > 0 ? (students[0][state.enrollmentNoKey] || '') : '';
                 const endEnrollment = students.length > 0 ? (students[students.length - 1][state.enrollmentNoKey] || '') : '';
-                
-                const enrollmentRange = state.isBlankSheet 
-                    ? `ENROLLMENT NO: MANUAL ENTRY` 
-                    : `ENROLLMENT NO: FROM ${startEnrollment} TO ${endEnrollment}`;
+                const enrollmentRange = state.isBlankSheet ? `ENROLLMENT NO: MANUAL ENTRY` : `ENROLLMENT NO: FROM ${startEnrollment} TO ${endEnrollment}`;
 
                 doc.autoTable({
-                    startY: startY,
-                    theme: 'grid',
+                    startY: lineY + 3, theme: 'grid',
                     styles: { fontSize: 9, cellPadding: 1.5, lineWidth: 0.1, lineColor: [0, 0, 0], valign: 'middle', textColor: [0, 0, 0] },
                     headStyles: { lineColor: [0, 0, 0] },
                     body: [
@@ -1433,26 +1302,19 @@
                 
                 const studentTableData = students.map((student, index) => {
                     const row = [ (index + 1), student[state.enrollmentNoKey] || '', student[state.studentNameKey] || '', '', '' ];
-                    if(examDetails.includeSubjectColumn) {
-                         row.splice(3, 0, ''); // Insert blank column for subject name
-                    }
+                    if(examDetails.includeSubjectColumn) row.splice(3, 0, '');
                     return row;
                 });
 
-                // Define headers dynamically based on checkbox
                 let mainTableHead = [['S.No.', 'Enrollment No.', 'Name of Student', 'No. of Supplementary', 'SIGN']];
                 let mainTableColStyles = { 0: { cellWidth: 10 }, 1: { cellWidth: 30 }, 2: { cellWidth: 70, halign: 'left' }, 3: { cellWidth: 30 }, 4: { cellWidth: 'auto' } };
-
                 if(examDetails.includeSubjectColumn) {
                     mainTableHead = [['S.No.', 'Enrollment No.', 'Name of Student', 'Subject Name', 'No. of Supplementary', 'SIGN']];
                     mainTableColStyles = { 0: { cellWidth: 10 }, 1: { cellWidth: 25 }, 2: { cellWidth: 55, halign: 'left' }, 3: { cellWidth: 35, halign: 'left' }, 4: { cellWidth: 25 }, 5: { cellWidth: 'auto' } };
                 }
 
                 doc.autoTable({
-                    startY: doc.autoTable.previous.finalY + 4,
-                    head: mainTableHead,
-                    body: studentTableData,
-                    theme: 'grid',
+                    startY: doc.autoTable.previous.finalY + 4, head: mainTableHead, body: studentTableData, theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 2, halign: 'center', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.1 },
                     headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.1 },
                     columnStyles: mainTableColStyles
@@ -1460,46 +1322,27 @@
 
                 let finalY = doc.autoTable.previous.finalY;
                 const pageHeight = doc.internal.pageSize.getHeight();
-                const requiredFooterHeight = 75;
+                if (pageHeight - finalY < 75) { doc.addPage(); finalY = 15; }
 
-                if (pageHeight - finalY < requiredFooterHeight) {
-                    doc.addPage();
-                    finalY = 15;
-                }
-
-                const statsTableData = [
-                    ["Total No. of Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"],
-                    [examDetails.totalStudentsInBlock, "", "", "", "", ""]
-                ];
-                
+                const statsTableData = [["Total No. of Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"], [examDetails.totalStudentsInBlock, "", "", "", "", ""]];
                 doc.autoTable({
-                    startY: finalY + 10,
-                    head: [statsTableData[0]],
-                    body: [statsTableData[1]],
-                    theme: 'grid',
+                    startY: finalY + 10, head: [statsTableData[0]], body: [statsTableData[1]], theme: 'grid',
                     styles: { fontSize: 8, halign: 'center', cellPadding: 2, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.1 },
                     headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.1 }
                 });
 
                 finalY = doc.autoTable.previous.finalY;
+                doc.setFontSize(8).text("I HEREBY DECLARE THAT I HAVE VERIFIED ABOVE MENTIONED DETAILS AND ALSO DECLARE THAT STUDENTS HAVE RETURNED THESE ANSWER BOOKS AS MENTIONED ABOVE.", 15, finalY + 8, { maxWidth: pageWidth - 30 });
                 
-                const disclaimerY = finalY + 8;
-                doc.setFontSize(8);
-                doc.text("I HEREBY DECLARE THAT I HAVE VERIFIED ABOVE MENTIONED DETAILS AND ALSO DECLARE THAT STUDENTS HAVE RETURNED THESE ANSWER BOOKS AS MENTIONED ABOVE.", 15, disclaimerY, { maxWidth: pageWidth - 30 });
-                
-                const signatureY = disclaimerY + 20;
-                const signatureLineSpacing = 4;
                 doc.setFontSize(9);
+                const sigY = finalY + 28;
+                doc.text("SIGNATURE INVIGILATOR", 20, sigY);
+                doc.text("SIGNATURE", pageWidth / 2, sigY, { align: "center" });
+                doc.text("Deputy Chief Superintendent", pageWidth / 2, sigY + 4, { align: "center" });
+                doc.text("SIGNATURE", pageWidth - 20, sigY, { align: "right" });
+                doc.text("Chief Superintendent", pageWidth - 20, sigY + 4, { align: "right" });
                 
-                doc.text("SIGNATURE INVIGILATOR", 20, signatureY);
-                doc.text("SIGNATURE", pageWidth / 2, signatureY, { align: "center" });
-                doc.text("Deputy Chief Superintendent", pageWidth / 2, signatureY + signatureLineSpacing, { align: "center" });
-                doc.text("SIGNATURE", pageWidth - 20, signatureY, { align: "right" });
-                doc.text("Chief Superintendent", pageWidth - 20, signatureY + signatureLineSpacing, { align: "right" });
-                
-                // Add Page Number Footer
-                doc.setFontSize(8);
-                doc.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                doc.setFontSize(8).text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
             }
 
             // --- General Utility Functions ---
@@ -1507,27 +1350,15 @@
                 const statusClass = { 'success': 'status-success', 'warn': 'status-warn', 'error': 'status-error' };
                 element.className = `status-box ${statusClass[type]}`;
                 element.textContent = message;
-                
+                element.classList.remove('hidden');
                 lucide.createIcons();
             }
             
-            function resetApp() {
-                location.reload();
-            }
+            function resetApp() { location.reload(); }
 
             function initializePickers() {
-                flatpickr("#exam-date", {
-                    altInput: true,
-                    altFormat: "F j, Y",
-                    dateFormat: "d-m-Y",
-                    defaultDate: "today"
-                });
-                flatpickr("#exam-time", {
-                    enableTime: true,
-                    noCalendar: true,
-                    dateFormat: "h:i K",
-                    defaultDate: new Date()
-                });
+                flatpickr("#exam-date", { altInput: true, altFormat: "F j, Y", dateFormat: "d-m-Y", defaultDate: "today" });
+                flatpickr("#exam-time", { enableTime: true, noCalendar: true, dateFormat: "h:i K", defaultDate: new Date() });
             }
             
             async function preloadLogo() {
@@ -1537,13 +1368,8 @@
                     const blob = await response.blob();
                     const reader = new FileReader();
                     reader.readAsDataURL(blob);
-                    reader.onloadend = () => {
-                        state.logoBase64 = reader.result;
-                        console.log('Local logo preloaded successfully.');
-                    };
-                } catch (error) {
-                    console.warn('Could not preload local logo:', error);
-                }
+                    reader.onloadend = () => { state.logoBase64 = reader.result; };
+                } catch (error) { console.warn('Could not preload local logo:', error); }
             }
 
 
@@ -1558,4 +1384,3 @@
     </script>
 </body>
 </html>
-
