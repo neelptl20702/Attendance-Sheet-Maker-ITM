@@ -84,7 +84,7 @@
         .step.active .step-label { color: #1e293b; }
         .stepper::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 2px; background-color: #e2e8f0; transform: translateY(-50%); z-index: -1; }
         
-        /* Modal */
+        /* Modal - Compacted for better UX */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -99,14 +99,15 @@
         }
         .modal-content {
             background-color: white;
-            padding: 2rem;
+            padding: 1.5rem; /* Reduced padding for compactness */
             border-radius: 1rem;
-            max-width: 900px; /* Wider modal for powerful preview */
+            max-width: 900px; 
             width: 90%;
-            max-height: 90vh; /* Limit modal height */
+            max-height: 90vh; 
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             display: flex;
             flex-direction: column;
+            overflow-y: auto; /* Added for scrollability to ensure preview visibility */
         }
 
         /* Split Button Styles */
@@ -417,28 +418,34 @@
         </div>
     </div>
 
-    <!-- NEW: Data Cleaning & Preview Modal -->
+    <!-- NEW: Data Cleaning & Preview Modal (UX IMPROVED) -->
     <div id="data-cleaning-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <h2 class="text-xl font-bold text-slate-800 mb-4">
-                <i data-lucide="ruler" class="w-5 h-5 inline-block mr-2 text-slate-600"></i>
+            <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center">
+                <i data-lucide="ruler" class="w-6 h-6 inline-block mr-3 text-slate-600"></i>
                 Data Cleaning & Mapping (Step 1 Review)
             </h2>
-            <p class="text-slate-600 mb-4">Review the inferred data structure below. Adjust the settings to ensure the columns and rows are correct before mapping.</p>
+            <p class="text-slate-600 mb-4">Review the inferred data structure below. Adjust the settings to ensure the columns and rows are correctly interpreted before mapping the required fields.</p>
 
             <!-- Configuration Controls -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg bg-gray-50 mb-6">
-                
-                <div class="input-group">
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Skip Initial Rows</label>
-                    <input type="number" id="skip-rows" value="0" min="0" class="w-full" placeholder="e.g., 2" oninput="liveUpdatePreview()">
-                    <p class="text-xs text-slate-500 mt-1">Ignores blank/junk rows at the top.</p>
-                </div>
-                
-                <div class="flex items-end justify-start md:col-span-2">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="force-header-toggle" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" onchange="liveUpdatePreview()">
-                        <label for="force-header-toggle" class="ml-2 block text-sm text-slate-800 font-medium">Force First Row as Header</label>
+            <div class="border border-indigo-200 p-4 rounded-lg bg-indigo-50 mb-6">
+                <h3 class="font-semibold text-lg text-indigo-800 mb-3 flex items-center">
+                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                    Data Preparation Settings
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Skip Initial Rows</label>
+                        <input type="number" id="skip-rows" value="0" min="0" class="w-full" placeholder="e.g., 2" oninput="liveUpdatePreview()">
+                        <p class="text-xs text-slate-500 mt-1">Ignores blank/junk rows at the top.</p>
+                    </div>
+                    
+                    <div class="flex items-end justify-start md:col-span-2 pt-6">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="force-header-toggle" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" onchange="liveUpdatePreview()">
+                            <label for="force-header-toggle" class="ml-2 block text-sm text-slate-800 font-medium">Force First Visible Row as Header</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -447,11 +454,11 @@
             <h3 class="text-lg font-semibold text-slate-700 mb-2 flex items-center justify-between">
                 <span class="flex items-center">
                     <i data-lucide="table" class="w-4 h-4 mr-1"></i>
-                    Live Data Preview
+                    Live Data Preview (Top 15 Rows)
                 </span>
                 <span id="preview-interpretation" class="text-xs font-medium px-2 py-1 rounded-full bg-gray-200 text-gray-700"></span>
             </h3>
-            <div class="overflow-x-auto rounded-lg border border-slate-200 mb-6 flex-grow" style="max-height: 250px;">
+            <div class="overflow-x-auto rounded-lg border border-slate-200 mb-6 flex-grow" style="max-height: 280px;">
                 <table id="live-preview-table" class="min-w-full divide-y divide-slate-200 text-xs">
                     <thead class="bg-slate-100 sticky top-0 z-10"></thead>
                     <tbody class="divide-y divide-slate-100"></tbody>
@@ -459,18 +466,22 @@
             </div>
 
             <!-- Final Mapping Controls -->
-            <h3 class="text-lg font-semibold text-slate-700 mb-3 flex items-center">
-                <i data-lucide="plug" class="w-4 h-4 mr-1"></i>
-                Required Column Mapping
-            </h3>
-            <div class="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4 **sm:items-start**">
-                <div class="input-group">
-                    <label for="enrollment-map" class="block text-sm font-medium text-slate-700 mb-1">Enrollment Number Column</label>
-                    <select id="enrollment-map"></select>
-                </div>
-                 <div class="input-group">
-                    <label for="name-map" class="block text-sm font-medium text-slate-700 mb-1">Student Name Column</label>
-                    <select id="name-map"></select>
+            <div class="p-5 rounded-xl border-2 border-green-300 bg-green-50 shadow-md">
+                <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+                    <i data-lucide="map" class="w-5 h-5 mr-2"></i>
+                    Required Column Mapping
+                </h3>
+                <p class="text-sm text-green-700 mb-4">Please select the correct column names from your file for **Enrollment Number** and **Student Name**. This is mandatory to proceed to the next step.</p>
+
+                <div class="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="enrollment-map" class="block text-sm font-medium text-green-800 mb-1 font-bold">Enrollment Number Column</label>
+                        <select id="enrollment-map"></select>
+                    </div>
+                     <div class="input-group">
+                        <label for="name-map" class="block text-sm font-medium text-green-800 mb-1 font-bold">Student Name Column</label>
+                        <select id="name-map"></select>
+                    </div>
                 </div>
             </div>
 
@@ -792,8 +803,25 @@
             function parseAoA(rawAoA, skipRows, isHeaderForced) {
                 if (rawAoA.length === 0) return { data: [], headers: [] };
 
-                const actualDataStart = skipRows;
-                let dataRows = rawAoA.slice(actualDataStart);
+                let dataRows = rawAoA.slice(skipRows);
+
+                // --- BUG FIX START ---
+                // Find the first row that actually contains data to prevent errors with leading blank rows
+                let firstMeaningfulRowIndex = -1;
+                for(let i = 0; i < dataRows.length; i++) {
+                    // Check if any cell in the row has content
+                    if (dataRows[i].some(cell => cell !== null && cell !== undefined && String(cell).trim() !== '')) {
+                        firstMeaningfulRowIndex = i;
+                        break;
+                    }
+                }
+
+                // If no data is found in any row, return empty
+                if (firstMeaningfulRowIndex === -1) return { data: [], headers: [] };
+                
+                // Adjust dataRows to start from the first row with actual content
+                dataRows = dataRows.slice(firstMeaningfulRowIndex);
+                // --- BUG FIX END ---
                 
                 if (dataRows.length === 0) return { data: [], headers: [] };
                 
@@ -804,7 +832,7 @@
                     headerRow = dataRows[0];
                     studentDataAoA = dataRows.slice(1);
                 } else {
-                    // Create generic headers based on the width of the first effective data row
+                    // This is now safe because dataRows[0] is guaranteed to be a non-empty row
                     const columnsCount = dataRows[0].length;
                     headerRow = Array.from({ length: columnsCount }, (_, i) => `Column ${String.fromCharCode(65 + i)}`);
                     studentDataAoA = dataRows;
@@ -1426,7 +1454,7 @@
                     body: studentTableData,
                     theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 2, halign: 'center', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.1 },
-                    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.1, lineColor: [0, 0, 0] },
+                    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.1 },
                     columnStyles: mainTableColStyles
                 });
 
@@ -1530,3 +1558,4 @@
     </script>
 </body>
 </html>
+
