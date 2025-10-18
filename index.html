@@ -10,40 +10,81 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Lucide Icons for better iconography -->
+    <script src="https://unpkg.com/lucide@latest"></script> 
     <style>
+        /* --- Official University Brand Color (Deep Maroon: #8e001a) --- */
+        :root {
+            --color-primary: #8e001a;
+            --color-primary-light: #c20025;
+            --color-primary-extralight: #fce7f3; /* Used for subtle highlights */
+            --color-secondary: #0a4f36; /* Dark green accent for success (Next/Go) */
+        }
+        
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         .app-container { max-width: 960px; margin: 1rem auto; }
         .step-section { transition: all 0.3s ease; border: 1px solid #e2e8f0; }
-        .step-header { font-weight: 700; font-size: 1.5rem; color: #1e293b; margin-bottom: 1rem; }
+        
+        /* Enhanced Typography */
+        .step-header { font-weight: 800; font-size: 1.6rem; color: var(--color-primary); margin-bottom: 1rem; border-bottom: 3px solid var(--color-primary-extralight); padding-bottom: 0.5rem; }
+        
         input[type="file"] { display: none; }
-        .custom-file-upload { display: inline-block; cursor: pointer; padding: 14px 28px; border-radius: 50px; background-color: #4f46e5; color: #ffffff; font-weight: 600; transition: background-color 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .custom-file-upload:hover { background-color: #4338ca; }
-        .action-button { padding: 12px 24px; border-radius: 50px; font-weight: 600; transition: all 0.2s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
+        /* Primary Action Button (File Upload) */
+        .custom-file-upload { display: inline-block; cursor: pointer; padding: 14px 28px; border-radius: 50px; background-color: var(--color-primary); color: #ffffff; font-weight: 600; transition: background-color 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .custom-file-upload:hover { background-color: var(--color-primary-light); }
+        
+        .action-button { 
+            padding: 12px 24px; 
+            border-radius: 50px; 
+            font-weight: 600; 
+            transition: all 0.2s ease; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
         .action-button:hover { transform: translateY(-2px); }
         .action-button:disabled { background-color: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
-        .next-button { background-color: #10b981; color: #ffffff; }
-        .next-button:hover:not(:disabled) { background-color: #059669; }
+        
+        /* Next/Main Action Button (Green for progression) */
+        .next-button { background-color: var(--color-secondary); color: #ffffff; }
+        .next-button:hover:not(:disabled) { background-color: #0d6e4b; }
+
+        /* Secondary/Back Button (Neutral) */
+        .back-button { background-color: #e2e8f0; color: #1e293b; }
+        .back-button:hover:not(:disabled) { background-color: #cbd5e1; }
+        
+        /* Input Styling */
         .input-group input, .input-group select { padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; width: 100%; transition: border-color 0.3s ease, box-shadow 0.3s ease; background-color: white; }
-        .input-group input:focus, .input-group select:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
+        .input-group input:focus, .input-group select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(142, 0, 26, 0.2); }
         .input-group input.input-error, .input-group select.input-error {
             border-color: #ef4444;
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
         }
+        
+        /* Status Boxes */
         .status-box { padding: 12px; border-radius: 10px; font-weight: 500; margin-top: 1rem; }
-        .status-success { background-color: #dcfce7; color: #16a34a; }
+        .status-success { background-color: #dcfce7; color: var(--color-secondary); }
         .status-error { background-color: #fee2e2; color: #ef4444; }
         .status-warn { background-color: #fef9c3; color: #ca8a04; }
-        .summary-box { border: 2px solid #6366f1; background-color: #eef2ff; padding: 1rem; border-radius: 12px; font-weight: 600; color: #4338ca; }
+        
+        /* Summary Box */
+        .summary-box { border: 2px solid var(--color-primary); background-color: var(--color-primary-extralight); padding: 1rem; border-radius: 12px; font-weight: 600; color: var(--color-primary); }
         .remove-block-btn { background-color: #ef4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 16px; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease; }
         .remove-block-btn:hover { background-color: #dc2626; }
+        
+        /* Stepper */
         .stepper { display: flex; justify-content: space-between; margin-bottom: 2rem; position: relative; }
         .step { text-align: center; flex: 1; }
         .step-circle { width: 40px; height: 40px; border-radius: 50%; background-color: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: 600; transition: all 0.3s ease; border: 2px solid transparent; }
         .step-label { font-size: 0.875rem; color: #64748b; font-weight: 500; }
-        .step.active .step-circle { background-color: #4f46e5; color: white; border-color: #a5b4fc; }
+        .step.active .step-circle { background-color: var(--color-primary); color: white; border-color: var(--color-primary-light); }
         .step.active .step-label { color: #1e293b; }
         .stepper::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 2px; background-color: #e2e8f0; transform: translateY(-50%); z-index: -1; }
+        
+        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -60,9 +101,82 @@
             background-color: white;
             padding: 2rem;
             border-radius: 1rem;
-            max-width: 500px;
+            max-width: 900px; /* Wider modal for powerful preview */
             width: 90%;
+            max-height: 90vh; /* Limit modal height */
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Split Button Styles */
+        .split-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Gap for mobile stacking */
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .split-button-group {
+                flex-direction: row;
+                gap: 0; /* Remove gap when side-by-side */
+                width: auto;
+            }
+            .split-button-group > button {
+                border-radius: 0; /* Make buttons rectangular in desktop view */
+            }
+            .split-button-group > button:first-child {
+                border-top-left-radius: 50px;
+                border-bottom-left-radius: 50px;
+            }
+            .split-button-group > button:last-child {
+                border-top-right-radius: 50px;
+                border-bottom-right-radius: 50px;
+            }
+        }
+
+        /* Split Button Visuals (Material 3 Inspired) */
+        .split-button-primary { 
+            background-color: var(--color-primary); 
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+        }
+        .split-button-primary:hover:not(:disabled) { 
+            background-color: var(--color-primary-light); 
+            transform: translateY(-2px);
+        }
+        .split-button-secondary { 
+            background-color: white; 
+            color: var(--color-primary); 
+            border: 2px solid var(--color-primary); 
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+        }
+        .split-button-secondary:hover:not(:disabled) { 
+            background-color: var(--color-primary-extralight); 
+            transform: translateY(-2px);
+        }
+
+        /* Tabbed Source Selection Styling */
+        .tab-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            font-weight: 600;
+            border-bottom-width: 2px;
+            border-color: transparent;
+            color: #64748b;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .tab-button.active {
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+            background-color: var(--color-primary-extralight);
+        }
+        .tab-button:not(.active):hover {
+            color: #1e293b;
         }
     </style>
 </head>
@@ -72,37 +186,63 @@
         <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-8 text-slate-800">Attendance Sheet Creator</h1>
 
         <div class="stepper mb-10">
-            <div id="stepper-1" class="step"><div class="step-circle">1</div><div class="step-label">Upload Data</div></div>
+            <div id="stepper-1" class="step"><div class="step-circle">1</div><div class="step-label">Source Data</div></div>
             <div id="stepper-2" class="step"><div class="step-circle">2</div><div class="step-label">Define Blocks</div></div>
             <div id="stepper-3" class="step"><div class="step-circle">3</div><div class="step-label">Exam Details</div></div>
         </div>
 
         <div id="step-1" class="step-section p-4 sm:p-6 rounded-lg">
-            <div class="step-header">Step 1: Upload Student Data</div>
-            <p class="text-slate-600 mb-6">Upload your student list to begin. The university logo will be added automatically to the PDF.</p>
             
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <label for="student-file" class="custom-file-upload w-full sm:w-auto text-center">Choose Student File</label>
-                <input type="file" id="student-file" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
-                <span id="file-name" class="text-slate-500 truncate">No file selected.</span>
-            </div>
-            <div class="mt-4 flex items-center">
-                <input type="checkbox" id="headerless-file" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                <label for="headerless-file" class="ml-2 block text-sm text-slate-800 font-medium">My file does not have a header row</label>
-            </div>
-
-            <hr class="my-6">
-
-            <div>
-                <h3 class="font-semibold text-slate-700 mb-2">Required Excel Format</h3>
-                <p class="text-slate-600 text-sm mb-4">Your file should have columns for enrollment number and student name. The column names don't matter, as you can map them in the next step.</p>
-                <img src="excel_preview.png" alt="Example of correct excel format" class="rounded-md border border-slate-300 shadow-sm" onerror="this.style.display='none'; this.parentElement.querySelector('p').textContent = 'Preview image (excel_preview.png) not found in repository.'">
+            <!-- Tab Toggle for Modes -->
+            <div class="flex border-b border-gray-200 mb-6 -mx-4 sm:mx-0">
+                <button id="mode-file-btn" class="tab-button active w-1/2">
+                     <i data-lucide="upload" class="w-5 h-5 mr-2"></i>
+                     Regular Exam (File Upload)
+                </button>
+                <button id="mode-blank-btn" class="tab-button w-1/2">
+                    <i data-lucide="clipboard-pen" class="w-5 h-5 mr-2"></i>
+                    Blank Sheet Template
+                </button>
             </div>
 
+            <!-- Content for File Upload Mode -->
+            <div id="file-upload-content">
+                <div class="step-header">Step 1: Upload Student Data</div>
+                <p class="text-slate-600 mb-6">Upload your student list to begin. The university logo will be added automatically to the PDF.</p>
+                
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <label for="student-file" class="custom-file-upload w-full sm:w-auto text-center">
+                        <i data-lucide="file-text" class="w-5 h-5 mr-2 inline-block"></i>Choose Student File
+                    </label>
+                    <input type="file" id="student-file" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+                    <span id="file-name" class="text-slate-500 truncate">No file selected.</span>
+                </div>
+
+                <hr class="my-6">
+
+                <div>
+                    <h3 class="font-semibold text-slate-700 mb-2">Required Excel Format</h3>
+                    <p class="text-slate-600 text-sm mb-4">Your file should have columns for enrollment number and student name. The column names don't matter, as you can map them in the next step.</p>
+                    <img src="excel_preview.png" alt="Example of correct excel format" class="rounded-md border border-slate-300 shadow-sm" onerror="this.style.display='none'; this.parentElement.querySelector('p').textContent = 'Preview image (excel_preview.png) not found in repository.'">
+                </div>
+            </div>
+            
+            <!-- Content for Blank Sheet Mode -->
+            <div id="blank-sheet-content" class="hidden">
+                 <div class="step-header">Step 1: Blank Sheet Template</div>
+                 <p class="text-slate-600 mb-6">Generate empty attendance sheets for manual entry. You will define the total number of blank rows and block details in the next step.</p>
+                 <div class="flex justify-end mt-6">
+                     <button id="next-to-step2-blank-btn" class="action-button next-button w-full sm:w-auto">
+                        Next 
+                        <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                     </button>
+                 </div>
+            </div>
+            
             <div id="file-status" class="status-box hidden"></div>
             
             <div id="data-preview-section" class="hidden mt-6">
-                <h3 class="text-lg font-semibold text-slate-700 mb-2">Data Preview</h3>
+                <h3 class="text-lg font-semibold text-slate-700 mb-2">Data Preview (Mapped Columns)</h3>
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table id="preview-table" class="min-w-full divide-y divide-slate-200 text-sm">
                         <thead class="bg-slate-50"></thead>
@@ -112,7 +252,10 @@
             </div>
 
             <div class="flex justify-end mt-6">
-                 <button id="next-to-step2-btn" class="action-button next-button w-full sm:w-auto" disabled>Next →</button>
+                 <button id="next-to-step2-btn" class="action-button next-button w-full sm:w-auto" disabled>
+                    Next 
+                    <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                 </button>
             </div>
         </div>
 
@@ -121,10 +264,8 @@
             <p class="text-slate-600 mb-6">Allocate students into blocks. You can create one special block for a specific enrollment range, and then allocate the rest by count.</p>
 
             <div id="show-range-block-container" class="mb-6 text-center border border-dashed border-gray-300 p-4 rounded-lg hover:border-indigo-400 transition-colors cursor-pointer">
-                <button id="show-range-block-btn" class="text-indigo-600 font-semibold w-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
+                <button id="show-range-block-btn" class="text-indigo-600 font-semibold w-full" onclick="window.showRangeBlockSection()">
+                    <i data-lucide="split-square-horizontal" class="w-5 h-5 inline-block mr-1"></i>
                     Create a Block by Enrollment Range (Optional)
                 </button>
             </div>
@@ -139,7 +280,7 @@
                      <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Exam Centre</label><select id="range-block-center"><option value="">Select Center</option><option value="SOB">SOB</option><option value="SOP">SOP</option><option value="SOCSET" selected>SOCSET</option></select></div>
                      <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Room No.</label><input type="text" id="range-block-room-no" placeholder="e.g., EB 54"></div>
                      <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Block No.</label><input type="text" id="range-block-no" placeholder="e.g., 5"></div>
-                     <div class="md:col-span-2 flex justify-end items-center"><button id="create-range-block-btn" class="action-button bg-indigo-600 text-white hover:bg-indigo-700">Create Special Block</button></div>
+                     <div class="md:col-span-2 flex justify-end items-center"><button id="create-range-block-btn" class="action-button bg-indigo-600 text-white hover:bg-indigo-700" onclick="window.createSpecialBlock()">Create Special Block</button></div>
                 </div>
                  <div id="range-block-status" class="status-box hidden"></div>
             </div>
@@ -153,11 +294,21 @@
             <h3 class="font-semibold text-lg text-slate-800 mb-3">Allocate Remaining Students by Count</h3>
             <div id="blocks-container"></div>
             <div class="flex items-center justify-between mt-6">
-                <button id="add-block" class="action-button bg-gray-200 text-slate-700 hover:bg-gray-300 text-sm sm:text-base">+ Add Block</button>
+                <button id="add-block" class="action-button back-button text-sm sm:text-base">
+                    <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                    Add Block
+                </button>
                 <div id="student-count-status" class="status-box hidden p-2 text-sm mt-0"></div>
             </div>
-            <div class="flex justify-end mt-8">
-                <button id="next-to-step3-btn" class="action-button next-button w-full sm:w-auto" disabled>Next →</button>
+            <div class="flex justify-between mt-8 gap-4">
+                <button id="back-to-step1-btn" class="action-button back-button w-full sm:w-auto" onclick="navigateToStep(1)">
+                    <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                    Back
+                </button>
+                <button id="next-to-step3-btn" class="action-button next-button w-full sm:w-auto" disabled>
+                    Next 
+                    <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                </button>
             </div>
         </div>
 
@@ -202,27 +353,51 @@
                         <option value="CSE">CSE</option>
                         <option value="IT">IT</option>
                         <option value="AI">AI</option>
-                        <option value="DS">DS</option>
-                        <option value="CS">CS</option>
+                        <option value="CSN">CSN</option>
                         <option value="CSA">CSA</option>
+                        <option value="COMBINED">COMBINED</option>
                     </select>
                 </div>
                 <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Date</label><input type="text" id="exam-date" placeholder="Select Date..."></div>
                 <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Time</label><input type="text" id="exam-time" placeholder="Select Time..."></div>
-                <div class="md:col-span-2 flex items-center mt-2">
-                    <input type="checkbox" id="is-remedial-exam" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <label for="is-remedial-exam" class="ml-2 block text-sm text-slate-800 font-medium">Is this a Remedial Exam?</label>
+                
+                <div class="md:col-span-2 flex justify-between items-center mt-2">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="is-remedial-exam" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <label for="is-remedial-exam" class="ml-2 block text-sm text-slate-800 font-medium">Is this a Remedial Exam?</label>
+                    </div>
+                    <!-- Subject Column Checkbox -->
+                    <div class="flex items-center">
+                        <input type="checkbox" id="include-subject-column" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <label for="include-subject-column" class="ml-2 block text-sm text-slate-800 font-medium">Include Subject Column</label>
+                    </div>
                 </div>
             </div>
             
-            <div class="flex items-center justify-end mt-6">
-                <input type="checkbox" id="combine-pdf" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                <label for="combine-pdf" class="ml-2 block text-sm text-slate-800 font-medium">Combine all sheets into a single PDF file</label>
-            </div>
-
             <div class="flex flex-col-reverse sm:flex-row justify-between mt-8 gap-4">
-                 <button id="reset-btn" class="action-button bg-gray-200 text-slate-700 hover:bg-gray-300 w-full sm:w-auto">Start Over</button>
-                <button id="generate-btn" class="action-button next-button w-full sm:w-auto">Generate PDF(s)</button>
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <!-- NEW: Back Button -->
+                    <button id="back-to-step2-btn" class="action-button back-button w-full sm:w-auto" onclick="window.backToStep2()">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                        Back
+                    </button>
+                    <!-- NEW: Edit (Jump to Step 1) Button -->
+                    <button id="edit-step1-btn" class="action-button back-button w-full sm:w-auto" onclick="navigateToStep(1)">
+                        <i data-lucide="file-edit" class="w-5 h-5 mr-2"></i>
+                        Edit Source
+                    </button>
+                </div>
+                
+                <div class="split-button-group">
+                    <button id="generate-single-btn" class="action-button split-button-secondary w-full sm:w-auto">
+                        <i data-lucide="file-text" class="w-5 h-5 mr-2"></i>
+                        Generate Individual PDFs
+                    </button>
+                    <button id="generate-combined-btn" class="action-button split-button-primary w-full sm:w-auto">
+                        <i data-lucide="file-down" class="w-5 h-5 mr-2"></i>
+                        Generate Combined PDF
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -242,11 +417,53 @@
         </div>
     </div>
 
-    <div id="mapping-modal" class="modal-overlay hidden">
+    <!-- NEW: Data Cleaning & Preview Modal -->
+    <div id="data-cleaning-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <h2 class="text-xl font-bold text-slate-800 mb-4">Map Your Data Columns</h2>
-            <p class="text-slate-600 mb-6">Please tell us which columns in your file correspond to the required fields.</p>
-            <div class="space-y-4">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">
+                <i data-lucide="ruler" class="w-5 h-5 inline-block mr-2 text-slate-600"></i>
+                Data Cleaning & Mapping (Step 1 Review)
+            </h2>
+            <p class="text-slate-600 mb-4">Review the inferred data structure below. Adjust the settings to ensure the columns and rows are correct before mapping.</p>
+
+            <!-- Configuration Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg bg-gray-50 mb-6">
+                
+                <div class="input-group">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Skip Initial Rows</label>
+                    <input type="number" id="skip-rows" value="0" min="0" class="w-full" placeholder="e.g., 2" oninput="liveUpdatePreview()">
+                    <p class="text-xs text-slate-500 mt-1">Ignores blank/junk rows at the top.</p>
+                </div>
+                
+                <div class="flex items-end justify-start md:col-span-2">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="force-header-toggle" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" onchange="liveUpdatePreview()">
+                        <label for="force-header-toggle" class="ml-2 block text-sm text-slate-800 font-medium">Force First Row as Header</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Preview Grid -->
+            <h3 class="text-lg font-semibold text-slate-700 mb-2 flex items-center justify-between">
+                <span class="flex items-center">
+                    <i data-lucide="table" class="w-4 h-4 mr-1"></i>
+                    Live Data Preview
+                </span>
+                <span id="preview-interpretation" class="text-xs font-medium px-2 py-1 rounded-full bg-gray-200 text-gray-700"></span>
+            </h3>
+            <div class="overflow-x-auto rounded-lg border border-slate-200 mb-6 flex-grow" style="max-height: 250px;">
+                <table id="live-preview-table" class="min-w-full divide-y divide-slate-200 text-xs">
+                    <thead class="bg-slate-100 sticky top-0 z-10"></thead>
+                    <tbody class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+
+            <!-- Final Mapping Controls -->
+            <h3 class="text-lg font-semibold text-slate-700 mb-3 flex items-center">
+                <i data-lucide="plug" class="w-4 h-4 mr-1"></i>
+                Required Column Mapping
+            </h3>
+            <div class="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4 **sm:items-start**">
                 <div class="input-group">
                     <label for="enrollment-map" class="block text-sm font-medium text-slate-700 mb-1">Enrollment Number Column</label>
                     <select id="enrollment-map"></select>
@@ -256,8 +473,12 @@
                     <select id="name-map"></select>
                 </div>
             </div>
+
             <div class="flex justify-end mt-8">
-                <button id="confirm-mapping-btn" class="action-button next-button">Confirm & Preview</button>
+                <button id="confirm-cleaning-btn" class="action-button next-button">
+                    Confirm Mapping & Continue
+                    <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -272,12 +493,18 @@
                 studentData: [],
                 totalStudentsInFile: 0,
                 studentsToAllocateCount: 0,
-                enrollmentNoKey: null,
-                studentNameKey: null,
+                enrollmentNoKey: 'Enrollment No.', 
+                studentNameKey: 'Student Name',     
                 blockCount: 0,
                 rawHeaders: [],
                 tempJsonData: [],
                 logoBase64: null,
+                isBlankSheet: false, 
+                allocatedBlocks: [], 
+                
+                // NEW: Raw AoA data for live cleaning
+                rawAoA: [],
+                inferredHeaderStatus: false,
             };
 
             // DOM elements
@@ -285,10 +512,13 @@
                 studentFile: document.getElementById('student-file'),
                 fileNameSpan: document.getElementById('file-name'),
                 fileStatus: document.getElementById('file-status'),
-                headerlessCheckbox: document.getElementById('headerless-file'),
                 nextToStep2Btn: document.getElementById('next-to-step2-btn'),
+                nextToStep2BlankBtn: document.getElementById('next-to-step2-blank-btn'),
                 nextToStep3Btn: document.getElementById('next-to-step3-btn'),
-                generateBtn: document.getElementById('generate-btn'),
+                
+                generateCombinedBtn: document.getElementById('generate-combined-btn'),
+                generateSingleBtn: document.getElementById('generate-single-btn'),
+
                 addBlockBtn: document.getElementById('add-block'),
                 blocksContainer: document.getElementById('blocks-container'),
                 studentCountStatus: document.getElementById('student-count-status'),
@@ -296,15 +526,19 @@
                 totalStudentsToAllocate: document.getElementById('total-students-to-allocate'),
                 resetBtn: document.getElementById('reset-btn'),
                 loadingOverlay: document.getElementById('loading-overlay'),
-                combinePdfCheckbox: document.getElementById('combine-pdf'),
-                mappingModal: document.getElementById('mapping-modal'),
+                dataCleaningModal: document.getElementById('data-cleaning-modal'), // NEW ID
                 enrollmentMap: document.getElementById('enrollment-map'),
                 nameMap: document.getElementById('name-map'),
-                confirmMappingBtn: document.getElementById('confirm-mapping-btn'),
+                confirmCleaningBtn: document.getElementById('confirm-cleaning-btn'), // NEW ID
                 dataPreviewSection: document.getElementById('data-preview-section'),
                 previewTable: document.getElementById('preview-table'),
                 showRangeBlockContainer: document.getElementById('show-range-block-container'),
                 showRangeBlockBtn: document.getElementById('show-range-block-btn'),
+                livePreviewTable: document.getElementById('live-preview-table'), // NEW
+                skipRowsInput: document.getElementById('skip-rows'), // NEW
+                forceHeaderToggle: document.getElementById('force-header-toggle'), // NEW
+                previewInterpretation: document.getElementById('preview-interpretation'), // NEW
+
                 rangeBlock: {
                     section: document.getElementById('range-block-section'),
                     form: document.getElementById('range-block-form'),
@@ -326,22 +560,117 @@
                     examDate: document.getElementById('exam-date'),
                     examTime: document.getElementById('exam-time'),
                     isRemedialExam: document.getElementById('is-remedial-exam'),
+                    includeSubjectColumn: document.getElementById('include-subject-column'),
+                },
+                modeFileBtn: document.getElementById('mode-file-btn'),
+                modeBlankBtn: document.getElementById('mode-blank-btn'),
+                fileUploadContent: document.getElementById('file-upload-content'),
+                blankSheetContent: document.getElementById('blank-sheet-content'),
+                backToStep1Btn: document.getElementById('back-to-step1-btn'),
+                backToStep2Btn: document.getElementById('back-to-step2-btn'), 
+                editStep1Btn: document.getElementById('edit-step1-btn'),
+            };
+            
+            // --- Auto-Capitalization Logic FIX (Only add listeners if elements exist) ---
+            const capitalizedInputs = [
+                ui.rangeBlock.roomNo, ui.rangeBlock.blockNo, ui.rangeBlock.startEnrollment, ui.rangeBlock.endEnrollment,
+                ui.examDetails.courseCode, ui.examDetails.courseName,
+            ].filter(el => el); // Safely filter out null/undefined elements
+            
+            function applyAutoCapitalization(element) {
+                if (element) {
+                    element.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.toUpperCase();
+                    });
                 }
+            }
+            
+            capitalizedInputs.forEach(applyAutoCapitalization);
+
+            // --- Function exposed to global scope ---
+            window.navigateToStep = navigateToStep;
+            window.updateStudentCountStatus = updateStudentCountStatus;
+            window.liveUpdatePreview = liveUpdatePreview;
+            window.createSpecialBlock = createSpecialBlock;
+            window.findHeader = findHeader; 
+            window.getBlockDetails = getBlockDetails; 
+
+            // Dedicated Back function for Step 3 to 2
+            window.backToStep2 = function() {
+                navigateToStep(2);
+                restoreBlockState(); 
             };
 
-            // Event listeners
-            ui.studentFile.addEventListener('change', handleFile);
-            ui.nextToStep2Btn.addEventListener('click', () => navigateToStep(2));
-            ui.addBlockBtn.addEventListener('click', () => addBlockInput());
-            ui.blocksContainer.addEventListener('input', updateStudentCountStatus);
-            ui.nextToStep3Btn.addEventListener('click', () => navigateToStep(3));
-            ui.generateBtn.addEventListener('click', generateSheets);
-            ui.resetBtn.addEventListener('click', resetApp);
-            ui.confirmMappingBtn.addEventListener('click', processMappedData);
-            ui.rangeBlock.createBtn.addEventListener('click', createSpecialBlock);
-            ui.showRangeBlockBtn.addEventListener('click', showRangeBlockSection);
-            
-            // --- Navigation ---
+
+            // --- Event listeners (Wrapped in a single function for cleaner DOM check) ---
+            function setupEventListeners() {
+                if (ui.studentFile) ui.studentFile.addEventListener('change', handleFile);
+                if (ui.nextToStep2Btn) ui.nextToStep2Btn.addEventListener('click', () => navigateToStep(2));
+                if (ui.nextToStep2BlankBtn) ui.nextToStep2BlankBtn.addEventListener('click', () => navigateToStep(2));
+                if (ui.addBlockBtn) ui.addBlockBtn.addEventListener('click', () => addBlockInput());
+                if (ui.blocksContainer) ui.blocksContainer.addEventListener('input', window.updateStudentCountStatus); 
+                if (ui.nextToStep3Btn) ui.nextToStep3Btn.addEventListener('click', () => {
+                    saveBlockState(); 
+                    navigateToStep(3);
+                });
+                if (ui.resetBtn) ui.resetBtn.addEventListener('click', resetApp);
+                
+                // Note: Range block button uses inline onclick="window.createSpecialBlock()" in HTML
+                if (ui.showRangeBlockBtn) ui.showRangeBlockBtn.addEventListener('click', showRangeBlockSection); // showRangeBlockSection is local
+
+                if (ui.modeFileBtn) ui.modeFileBtn.addEventListener('click', () => setTabMode(false));
+                if (ui.modeBlankBtn) ui.modeBlankBtn.addEventListener('click', () => setTabMode(true));
+                
+                if (ui.generateCombinedBtn) ui.generateCombinedBtn.addEventListener('click', () => generateSheets('combined'));
+                if (ui.generateSingleBtn) ui.generateSingleBtn.addEventListener('click', () => generateSheets('single'));
+                
+                if (ui.backToStep2Btn) ui.backToStep2Btn.addEventListener('click', window.backToStep2);
+
+                if (ui.confirmCleaningBtn) ui.confirmCleaningBtn.addEventListener('click', finalizeDataCleaningAndMapping);
+            }
+
+
+            // --- Block Persistence Logic ---
+            function saveBlockState() {
+                state.allocatedBlocks = [];
+                const blockElements = ui.blocksContainer.querySelectorAll('.block-item');
+                blockElements.forEach(block => {
+                    const isSpecial = block.querySelector('.block-students').hasAttribute('readonly');
+                    state.allocatedBlocks.push({
+                        center: block.querySelector('.block-center')?.value || '',
+                        roomNo: block.querySelector('.block-room-no')?.value || '',
+                        blockNo: block.querySelector('.block-no')?.value || '',
+                        count: parseInt(block.querySelector('.block-students')?.value) || 0,
+                        isSpecial: isSpecial,
+                        studentEnrollments: isSpecial ? state.studentData.filter(s => s.isAllocated).map(s => s[state.enrollmentNoKey]) : []
+                    });
+                });
+            }
+
+            function restoreBlockState() {
+                ui.blocksContainer.innerHTML = '';
+                state.blockCount = 0;
+                
+                state.allocatedBlocks.forEach(details => {
+                    addBlockInput(details.isSpecial, details);
+                });
+
+                if (!state.isBlankSheet) {
+                    state.studentData.forEach(s => s.isAllocated = false);
+                    const specialBlockDetails = state.allocatedBlocks.find(b => b.isSpecial);
+                    if (specialBlockDetails) {
+                        state.studentData.forEach(s => {
+                            if (specialBlockDetails.studentEnrollments.includes(s[state.enrollmentNoKey])) {
+                                s.isAllocated = true;
+                            }
+                        });
+                    }
+                }
+                
+                window.updateStudentCountStatus();
+            }
+
+            // --- Navigation Functionality ---
             function navigateToStep(stepNumber) {
                 document.querySelectorAll('.step-section').forEach(sec => sec.classList.add('hidden'));
                 document.getElementById(`step-${stepNumber}`).classList.remove('hidden');
@@ -352,20 +681,478 @@
                         step.classList.add('active');
                     }
                 });
+                
+                lucide.createIcons();
 
                 if (stepNumber === 2) {
-                    ui.totalStudentsOriginal.textContent = state.totalStudentsInFile;
-                    state.studentsToAllocateCount = state.studentData.filter(s => !s.isAllocated).length;
-                    ui.totalStudentsToAllocate.textContent = state.studentsToAllocateCount;
+                    if (state.isBlankSheet) {
+                        ui.showRangeBlockContainer.classList.add('hidden'); 
+                        ui.rangeBlock.section.classList.add('hidden');
+                        
+                        if (ui.blocksContainer.children.length === 0) {
+                            state.studentsToAllocateCount = 0;
+                            ui.blocksContainer.innerHTML = '';
+                            state.blockCount = 0;
+                            addBlockInput();
+                        }
+
+                        ui.totalStudentsOriginal.textContent = 'N/A (Blank Sheet)';
+                        showStatus(ui.fileStatus, 'Ready to create blank attendance sheets. Define blocks now.', 'success');
+                    } else {
+                        ui.showRangeBlockContainer.classList.remove('hidden');
+                        state.studentsToAllocateCount = state.studentData.filter(s => !s.isAllocated).length;
+                        ui.totalStudentsOriginal.textContent = state.totalStudentsInFile;
+                        
+                        if (state.allocatedBlocks.length === 0 && ui.blocksContainer.children.length === 0) {
+                             ui.blocksContainer.innerHTML = '';
+                             state.blockCount = 0;
+                        }
+                    }
+                    window.updateStudentCountStatus(); 
                 }
             }
 
-            // --- Dynamic Year Population ---
+
+            // --- Mode Toggling ---
+            function setTabMode(isBlank) {
+                state.isBlankSheet = isBlank;
+                state.studentData = [];
+                state.totalStudentsInFile = 0;
+                state.allocatedBlocks = [];
+                ui.blocksContainer.innerHTML = '';
+                
+                ui.fileUploadContent.classList.toggle('hidden', isBlank);
+                ui.blankSheetContent.classList.toggle('hidden', !isBlank);
+                ui.nextToStep2Btn.classList.toggle('hidden', isBlank);
+                ui.nextToStep2BlankBtn.classList.toggle('hidden', !isBlank);
+                
+                ui.modeFileBtn.classList.toggle('active', !isBlank);
+                ui.modeBlankBtn.classList.toggle('active', isBlank);
+                
+                if (isBlank) {
+                    ui.nextToStep2Btn.disabled = true; 
+                    ui.dataPreviewSection.classList.add('hidden');
+                } else {
+                     ui.nextToStep2Btn.disabled = true;
+                }
+                
+                lucide.createIcons();
+            }
+
+
+            // --- Intelligent Header Detection Helpers ---
+            function isNumeric(value) {
+                return !isNaN(parseFloat(value)) && isFinite(value);
+            }
+            
+            function inferHeaderStatus(aoa) {
+                if (aoa.length < 2) return false;
+                
+                const firstRow = aoa[0];
+                const secondRow = aoa[1];
+                let textScoreFirstRow = 0;
+                let textScoreSecondRow = 0;
+                
+                const keywords = ['no', 'name', 'code', 'date', 'roll', 'enrollment', 'student', 'subject', 'sl', 'sr', 'id', 'full'];
+                
+                firstRow.forEach((cell, i) => {
+                    const value = String(cell || '').toLowerCase().trim();
+                    const isText = isNaN(value) && value !== '';
+                    
+                    if (isText) {
+                        textScoreFirstRow += 1;
+                    }
+                    if (keywords.some(k => value.includes(k))) {
+                        textScoreFirstRow += 2; // Strong indicator
+                    }
+
+                    const secondValue = String(secondRow[i] || '').toLowerCase().trim();
+                    const isSecondText = isNaN(secondValue) && secondValue !== '';
+                    if (isSecondText) {
+                        textScoreSecondRow += 1;
+                    }
+                });
+                
+                // Rule: If the first row is significantly more textual/keyword-heavy than the second, it's a header.
+                return (textScoreFirstRow > textScoreSecondRow + 2) && (textScoreFirstRow > (firstRow.length * 0.5));
+            }
+            
+            function findHeader(headers, possibleNames) {
+                 for (const name of possibleNames) {
+                    const found = headers.find(h => String(h).toLowerCase().trim().includes(name));
+                    if (found) return found;
+                }
+                return null;
+            }
+
+
+            // --- Step 1: File Handling & Data Cleaning Modal Logic ---
+            
+            // Function to parse raw AoA based on current modal controls
+            function parseAoA(rawAoA, skipRows, isHeaderForced) {
+                if (rawAoA.length === 0) return { data: [], headers: [] };
+
+                const actualDataStart = skipRows;
+                let dataRows = rawAoA.slice(actualDataStart);
+                
+                if (dataRows.length === 0) return { data: [], headers: [] };
+                
+                let headerRow = [];
+                let studentDataAoA = [];
+                
+                if (isHeaderForced) {
+                    headerRow = dataRows[0];
+                    studentDataAoA = dataRows.slice(1);
+                } else {
+                    // Create generic headers based on the width of the first effective data row
+                    const columnsCount = dataRows[0].length;
+                    headerRow = Array.from({ length: columnsCount }, (_, i) => `Column ${String.fromCharCode(65 + i)}`);
+                    studentDataAoA = dataRows;
+                }
+
+                // 2. Sanitize Headers
+                const sanitizedHeaders = {};
+                const headers = headerRow.map((h, i) => {
+                     let header = String(h || '').trim();
+                     if(header === '') header = `Column ${String.fromCharCode(65 + i)}`;
+                     let uniqueHeader = header;
+                     let count = 1;
+                     while(sanitizedHeaders[uniqueHeader]) {
+                        uniqueHeader = `${header}_${count++}`;
+                     }
+                     sanitizedHeaders[uniqueHeader] = true;
+                     return uniqueHeader;
+                });
+                
+                // 3. Convert to JSON and filter empty rows
+                const jsonData = studentDataAoA.map(row => {
+                    const obj = {};
+                    headers.forEach((h, i) => {
+                        obj[h] = row[i];
+                    });
+                    return obj;
+                }).filter(row => {
+                    // Only keep rows that have at least one non-empty value
+                    return Object.values(row).some(v => v !== undefined && v !== null && String(v).trim() !== '');
+                });
+
+                return { data: jsonData, headers: headers };
+            }
+
+            // Expose to global scope for inline HTML oninput attribute
+            function liveUpdatePreview() {
+                const skipRows = parseInt(ui.skipRowsInput.value) || 0;
+                const isHeaderForced = ui.forceHeaderToggle.checked;
+                
+                const { data: currentJsonData, headers: currentHeaders } = parseAoA(state.rawAoA, skipRows, isHeaderForced);
+
+                // Update headers in the mapping selects
+                ui.enrollmentMap.innerHTML = '';
+                ui.nameMap.innerHTML = '';
+                currentHeaders.forEach(header => {
+                    const option = new Option(header, header);
+                    ui.enrollmentMap.add(option.cloneNode(true));
+                    ui.nameMap.add(option.cloneNode(true));
+                });
+                
+                // --- Update Live Preview Table ---
+                const thead = ui.livePreviewTable.querySelector('thead');
+                const tbody = ui.livePreviewTable.querySelector('tbody');
+                
+                thead.innerHTML = '';
+                tbody.innerHTML = '';
+
+                // Create header row
+                const headerRowHtml = currentHeaders.map(h => `<th class="px-4 py-2 text-left font-bold text-slate-800">${h}</th>`).join('');
+                thead.innerHTML = `<tr>${headerRowHtml}</tr>`;
+
+                // Create data rows
+                currentJsonData.slice(0, 15).forEach((row, rowIndex) => {
+                    const tr = document.createElement('tr');
+                    tr.className = rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                    const rowHtml = currentHeaders.map(h => `<td class="px-4 py-2 text-slate-700 whitespace-nowrap">${row[h] || ''}</td>`).join('');
+                    tr.innerHTML = rowHtml;
+                    tbody.appendChild(tr);
+                });
+                
+                // Update interpretation text (New UI feature)
+                if (isHeaderForced) {
+                    ui.previewInterpretation.textContent = "First row interpreted as Header";
+                    ui.previewInterpretation.className = "text-xs font-medium px-2 py-1 rounded-full bg-green-200 text-green-700";
+                } else {
+                    ui.previewInterpretation.textContent = "Generic Columns Assigned";
+                    ui.previewInterpretation.className = "text-xs font-medium px-2 py-1 rounded-full bg-yellow-200 text-yellow-700";
+                }
+
+                // If data exists, attempt to auto-select mapping
+                if (currentHeaders.length > 0) {
+                    const autoEnrollment = window.findHeader(currentHeaders, ['enrollment no', 'enrollment', 'roll no', 'roll', 'enr no', 'column a']);
+                    const autoName = window.findHeader(currentHeaders, ['student name', 'name of student', 'name', 'full name', 'column b']);
+                    if (autoEnrollment) ui.enrollmentMap.value = autoEnrollment;
+                    if (autoName) ui.nameMap.value = autoName;
+                }
+            }
+
+
+            function handleFile(event) {
+                if (state.isBlankSheet) return;
+
+                const file = event.target.files[0];
+                if (!file) {
+                    ui.fileNameSpan.textContent = 'No file selected.';
+                    return;
+                }
+                ui.fileNameSpan.textContent = file.name;
+                ui.dataPreviewSection.classList.add('hidden');
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        
+                        // 1. Read raw AoA (with header 1)
+                        const aoa = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                        if (aoa.length === 0) {
+                            showStatus(ui.fileStatus, 'The file is empty.', 'error');
+                            return;
+                        }
+                        state.rawAoA = aoa;
+                        
+                        // 2. Infer header status for initial toggle state
+                        state.inferredHeaderStatus = inferHeaderStatus(aoa);
+                        ui.forceHeaderToggle.checked = state.inferredHeaderStatus;
+                        ui.skipRowsInput.value = '0';
+
+                        // 3. Open the powerful data cleaning modal
+                        ui.dataCleaningModal.classList.remove('hidden');
+                        window.liveUpdatePreview(); // Initial render based on inference
+
+                    } catch (error) {
+                        showStatus(ui.fileStatus, `Error reading file: ${error.message}.`, 'error');
+                        console.error("File processing error:", error);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            function finalizeDataCleaningAndMapping() {
+                const skipRows = parseInt(ui.skipRowsInput.value) || 0;
+                const isHeaderForced = ui.forceHeaderToggle.checked;
+
+                const { data: finalJsonData, headers: finalHeaders } = parseAoA(state.rawAoA, skipRows, isHeaderForced);
+
+                if (finalJsonData.length === 0) {
+                    showStatus(ui.fileStatus, 'Data extraction failed. Please review skip rows/header settings.', 'error');
+                    return;
+                }
+
+                state.enrollmentNoKey = ui.enrollmentMap.value;
+                state.studentNameKey = ui.nameMap.value;
+
+                if (state.enrollmentNoKey === state.studentNameKey) {
+                    showStatus(ui.fileStatus, 'Enrollment and Name columns cannot be the same.', 'error');
+                    return;
+                }
+                if (!state.enrollmentNoKey || !state.studentNameKey) {
+                     showStatus(ui.fileStatus, 'Please select both Enrollment and Name columns.', 'error');
+                     return;
+                }
+
+                state.tempJsonData = finalJsonData;
+                state.rawHeaders = finalHeaders; // Update rawHeaders to the final set of headers
+                
+                state.studentData = state.tempJsonData.map(row => ({ ...row, isAllocated: false }));
+                state.totalStudentsInFile = state.studentData.length;
+                showStatus(ui.fileStatus, `Successfully loaded ${state.totalStudentsInFile} students.`, 'success');
+                ui.nextToStep2Btn.disabled = false;
+                ui.dataCleaningModal.classList.add('hidden');
+                
+                displayDataPreview();
+            }
+            
+            // --- Step 2: Block Management Functions ---
+
+            function createSpecialBlock() {
+                if(state.isBlankSheet) {
+                    showStatus(ui.rangeBlock.status, 'Range blocks are not supported in Blank Sheet Template mode.', 'error');
+                    return;
+                }
+                
+                const start = ui.rangeBlock.startEnrollment.value.trim().toUpperCase();
+                const end = ui.rangeBlock.endEnrollment.value.trim().toUpperCase();
+
+                if (!start || !end) {
+                    showStatus(ui.rangeBlock.status, 'Please provide both a start and end enrollment number.', 'error');
+                    return;
+                }
+
+                // Temporary filter for unallocated students
+                const studentsInRange = state.studentData.filter(student => {
+                    const enrNo = String(student[state.enrollmentNoKey]).toUpperCase();
+                    return !student.isAllocated && enrNo >= start && enrNo <= end;
+                });
+
+                if (studentsInRange.length === 0) {
+                     showStatus(ui.rangeBlock.status, 'No unallocated students found in the specified enrollment range.', 'warn');
+                     return;
+                }
+
+                // Reset all blocks and re-allocate for the special block
+                ui.blocksContainer.innerHTML = '';
+                state.allocatedBlocks = [];
+
+                state.studentData.forEach(s => s.isAllocated = false);
+                studentsInRange.forEach(s => s.isAllocated = true);
+                
+                const blockDetails = {
+                    center: ui.rangeBlock.center.value,
+                    roomNo: ui.rangeBlock.roomNo.value,
+                    blockNo: ui.rangeBlock.blockNo.value,
+                    count: studentsInRange.length
+                };
+                
+                addBlockInput(true, blockDetails);
+
+                // Save block state immediately after creation to prevent loss on navigation
+                saveBlockState(); 
+                navigateToStep(3);
+            }
+
+            function showRangeBlockSection() {
+                ui.rangeBlock.section.classList.remove('hidden');
+                ui.showRangeBlockContainer.classList.add('hidden');
+            }
+
+
+            function addBlockInput(isSpecial = false, details = {}) {
+                state.blockCount++;
+                const blockDiv = document.createElement('div');
+                blockDiv.className = 'block-item flex flex-col gap-4 mb-4 p-4 rounded-lg bg-slate-50 border border-slate-200';
+                
+                let blockHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="font-bold text-lg text-slate-700">${isSpecial ? 'Special Block' : `Block ${state.blockCount}`}</div>
+                        ${!isSpecial ? `<button class="remove-block-btn" onclick="this.closest('.block-item').remove(); updateStudentCountStatus();">&times;</button>` : ''}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                `;
+
+                // Set default center/room/block for blank sheet to prevent undefined values in PDF details
+                const defaultDetails = {
+                    center: 'SOCSET',
+                    roomNo: state.isBlankSheet ? `R-BLANK-${state.blockCount}` : '',
+                    blockNo: state.isBlankSheet ? `B-BLANK-${state.blockCount}` : '',
+                    count: state.isBlankSheet ? 30 : 0
+                };
+                
+                const finalDetails = { ...defaultDetails, ...details };
+
+
+                if (isSpecial) {
+                    blockHTML += `
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Exam Centre</label><input type="text" class="block-center" value="${finalDetails.center}" readonly></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Room No.</label><input type="text" class="block-room-no" value="${finalDetails.roomNo}" readonly></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Block No.</label><input type="text" class="block-no" value="${finalDetails.blockNo}" readonly></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">No. of Students</label><input type="number" class="block-students" value="${finalDetails.count}" readonly></div>
+                    `;
+                } else {
+                     blockHTML += `
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Exam Centre</label><select class="block-center" required><option value="">Select Center</option><option value="SOB">SOB</option><option value="SOP">SOP</option><option value="SOCSET" ${finalDetails.center === 'SOCSET' ? 'selected' : ''}>SOCSET</option></select></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Room No.</label><input type="text" class="block-room-no" placeholder="e.g., EB 54" required value="${finalDetails.roomNo}"></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Block No.</label><input type="text" class="block-no" placeholder="e.g., 5" required value="${finalDetails.blockNo}"></div>
+                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">No. of Students</label><input type="number" class="block-students" placeholder="Number of students" required min="1" value="${finalDetails.count}"></div>
+                     `;
+                }
+                blockHTML += `</div>`;
+                blockDiv.innerHTML = blockHTML;
+                ui.blocksContainer.appendChild(blockDiv);
+                
+                // Apply auto-capitalization to new inputs if not special/readonly
+                if (!isSpecial) {
+                     const newRoomNoInput = blockDiv.querySelector('.block-room-no');
+                     const newBlockNoInput = blockDiv.querySelector('.block-no');
+                     applyAutoCapitalization(newRoomNoInput);
+                     applyAutoCapitalization(newBlockNoInput);
+                }
+                
+                window.updateStudentCountStatus();
+            }
+
+            function updateStudentCountStatus() {
+                // Expose to global scope for inline HTML onclick attribute
+                
+                if (state.isBlankSheet) {
+                    const regularInputs = Array.from(ui.blocksContainer.querySelectorAll('.block-students:not([readonly])'));
+                    state.studentsToAllocateCount = regularInputs.reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+                    
+                    ui.totalStudentsOriginal.textContent = `N/A (Total Blank: ${state.studentsToAllocateCount})`;
+                    ui.totalStudentsToAllocate.textContent = state.studentsToAllocateCount;
+                    
+                    ui.studentCountStatus.classList.remove('hidden', 'status-success', 'status-warn', 'status-error');
+                    
+                    if (state.studentsToAllocateCount > 0 && ui.blocksContainer.children.length > 0) {
+                        ui.studentCountStatus.className = 'status-box status-success p-2 text-sm mt-0';
+                        ui.studentCountStatus.textContent = `Total Blank Students defined: ${state.studentsToAllocateCount}. Ready for Step 3.`;
+                        ui.nextToStep3Btn.disabled = false;
+                    } else {
+                        ui.studentCountStatus.className = 'status-box status-warn p-2 text-sm mt-0';
+                        ui.studentCountStatus.textContent = 'Please define at least one block with students.';
+                        ui.nextToStep3Btn.disabled = true;
+                    }
+                    return; 
+                }
+                
+                // --- File Upload Mode Logic ---
+                
+                state.studentsToAllocateCount = state.studentData.filter(s => !s.isAllocated).length;
+                ui.totalStudentsToAllocate.textContent = state.studentsToAllocateCount;
+                
+                const regularInputs = Array.from(ui.blocksContainer.querySelectorAll('.block-students:not([readonly])'));
+                let totalInRegularBlocks = regularInputs.reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+                
+                ui.studentCountStatus.classList.remove('hidden', 'status-success', 'status-warn', 'status-error');
+                ui.nextToStep3Btn.disabled = true;
+
+                if (totalInRegularBlocks > state.studentsToAllocateCount) {
+                    ui.studentCountStatus.className = 'status-box status-error p-2 text-sm mt-0';
+                    ui.studentCountStatus.textContent = `Allocated: ${totalInRegularBlocks} (Exceeds remaining ${state.studentsToAllocateCount}!)`;
+                } else if (totalInRegularBlocks === state.studentsToAllocateCount) {
+                    ui.studentCountStatus.className = 'status-box status-success p-2 text-sm mt-0';
+                    ui.studentCountStatus.textContent = `Allocated: ${totalInRegularBlocks} (Perfect!)`;
+                    // Enable next if we allocated all remaining OR if the only remaining students are in a special block
+                    const isSpecialBlockPresent = ui.blocksContainer.querySelector('.block-students[readonly]');
+                    if (totalInRegularBlocks === state.studentsToAllocateCount && (totalInRegularBlocks > 0 || isSpecialBlockPresent)) {
+                         ui.nextToStep3Btn.disabled = false;
+                    }
+                } else {
+                    ui.studentCountStatus.className = 'status-box status-warn p-2 text-sm mt-0';
+                    ui.studentCountStatus.textContent = `Allocated: ${totalInRegularBlocks} (Remaining: ${state.studentsToAllocateCount - totalInRegularBlocks})`;
+                }
+
+                // Enable next if all students are accounted for (either by regular blocks or if there's a special block and no remaining students needed)
+                const isSpecialBlockPresent = ui.blocksContainer.querySelector('.block-students[readonly]');
+                if (totalInRegularBlocks === state.studentsToAllocateCount && (totalInRegularBlocks > 0 || isSpecialBlockPresent)) {
+                    ui.nextToStep3Btn.disabled = false;
+                }
+
+                if (totalInRegularBlocks === 0 && !isSpecialBlockPresent) {
+                     ui.studentCountStatus.classList.add('hidden');
+                }
+                if (state.studentsToAllocateCount === 0 && isSpecialBlockPresent) {
+                    ui.nextToStep3Btn.disabled = false;
+                    ui.studentCountStatus.classList.add('hidden');
+                }
+            }
+            
+            // --- Other General Utility Functions (Omitted for brevity) ---
+            
             function populateAcademicYears() {
                 const yearSelect = ui.examDetails.academicYear;
                 yearSelect.innerHTML = '<option value="">Select Academic Year</option>';
                 const currentYear = new Date().getFullYear();
-                for (let i = -1; i < 4; i++) { // Show previous year as well
+                for (let i = -1; i < 4; i++) { 
                     const startYear = currentYear + i;
                     const endYear = (startYear + 1).toString().slice(-2);
                     const yearString = `${startYear}-${endYear}`;
@@ -377,92 +1164,6 @@
                 }
             }
 
-
-            // --- Step 1: File Handling & Mapping ---
-            function handleFile(event) {
-                const file = event.target.files[0];
-                if (!file) {
-                    ui.fileNameSpan.textContent = 'No file selected.';
-                    return;
-                }
-                ui.fileNameSpan.textContent = file.name;
-                ui.dataPreviewSection.classList.add('hidden'); // Hide old preview
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        
-                        if (ui.headerlessCheckbox.checked) {
-                            const aoa = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                            if (aoa.length === 0) {
-                                showStatus(ui.fileStatus, 'The file is empty.', 'error');
-                                return;
-                            }
-                            state.rawHeaders = aoa[0].map((_, i) => `Column ${String.fromCharCode(65 + i)}`);
-                            state.tempJsonData = aoa.map(row => {
-                                const obj = {};
-                                state.rawHeaders.forEach((h, i) => {
-                                    obj[h] = row[i];
-                                });
-                                return obj;
-                            });
-                        } else {
-                            state.tempJsonData = XLSX.utils.sheet_to_json(sheet);
-                            if (state.tempJsonData.length === 0) {
-                                showStatus(ui.fileStatus, 'The file is empty or has no data.', 'error');
-                                return;
-                            }
-                            state.rawHeaders = Object.keys(state.tempJsonData[0]);
-                        }
-                        
-                        openMappingModal();
-
-                    } catch (error) {
-                        showStatus(ui.fileStatus, `Error reading file: ${error.message}.`, 'error');
-                        console.error("File processing error:", error);
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            }
-
-            function openMappingModal() {
-                ui.enrollmentMap.innerHTML = '';
-                ui.nameMap.innerHTML = '';
-                
-                state.rawHeaders.forEach(header => {
-                    const option = new Option(header, header);
-                    ui.enrollmentMap.add(option.cloneNode(true));
-                    ui.nameMap.add(option.cloneNode(true));
-                });
-                
-                const autoEnrollment = findHeader(state.rawHeaders, ['enrollment no', 'enrollment', 'roll no', 'roll', 'enr no', 'column a']);
-                const autoName = findHeader(state.rawHeaders, ['student name', 'name of student', 'name', 'full name', 'column b']);
-                if (autoEnrollment) ui.enrollmentMap.value = autoEnrollment;
-                if (autoName) ui.nameMap.value = autoName;
-
-                ui.mappingModal.classList.remove('hidden');
-            }
-            
-            function processMappedData() {
-                state.enrollmentNoKey = ui.enrollmentMap.value;
-                state.studentNameKey = ui.nameMap.value;
-                
-                if (state.enrollmentNoKey === state.studentNameKey) {
-                    showStatus(ui.fileStatus, 'Enrollment and Name columns cannot be the same.', 'error');
-                    return;
-                }
-
-                state.studentData = state.tempJsonData.map(row => ({ ...row, isAllocated: false }));
-                state.totalStudentsInFile = state.studentData.length;
-                showStatus(ui.fileStatus, `Successfully mapped and loaded ${state.totalStudentsInFile} students.`, 'success');
-                ui.nextToStep2Btn.disabled = false;
-                ui.mappingModal.classList.add('hidden');
-                
-                displayDataPreview();
-            }
 
             function displayDataPreview() {
                 ui.dataPreviewSection.classList.remove('hidden');
@@ -488,131 +1189,24 @@
                 });
             }
 
-            function findHeader(headers, possibleNames) {
-                 for (const name of possibleNames) {
-                    const found = headers.find(h => h.toLowerCase().trim().includes(name));
-                    if (found) return found;
-                }
-                return null;
-            }
-
-            // --- Step 2: Block Management ---
-            function showRangeBlockSection() {
-                ui.rangeBlock.section.classList.remove('hidden');
-                ui.showRangeBlockContainer.classList.add('hidden');
-            }
-
-            function createSpecialBlock() {
-                const start = ui.rangeBlock.startEnrollment.value.trim().toUpperCase();
-                const end = ui.rangeBlock.endEnrollment.value.trim().toUpperCase();
-
-                if (!start || !end) {
-                    showStatus(ui.rangeBlock.status, 'Please provide both a start and end enrollment number.', 'error');
-                    return;
-                }
-
-                const studentsInRange = state.studentData.filter(student => {
-                    const enrNo = String(student[state.enrollmentNoKey]).toUpperCase();
-                    return !student.isAllocated && enrNo >= start && enrNo <= end;
-                });
-
-                if (studentsInRange.length === 0) {
-                     showStatus(ui.rangeBlock.status, 'No unallocated students found in the specified enrollment range.', 'warn');
-                     return;
-                }
-
-                ui.blocksContainer.innerHTML = '';
-
-                state.studentData.forEach(s => s.isAllocated = false);
-                studentsInRange.forEach(s => s.isAllocated = true);
-                
-                const blockDetails = {
-                    center: ui.rangeBlock.center.value,
-                    roomNo: ui.rangeBlock.roomNo.value,
-                    blockNo: ui.rangeBlock.blockNo.value,
-                    count: studentsInRange.length
+            function getBlockDetails(blockElement, studentCount, generalDetails) {
+                 return {
+                    ...generalDetails,
+                    center: blockElement.querySelector('.block-center')?.value.toUpperCase() || 'N/A',
+                    roomNo: blockElement.querySelector('.block-room-no')?.value.toUpperCase() || 'N/A',
+                    blockNo: blockElement.querySelector('.block-no')?.value.toUpperCase() || 'N/A',
+                    totalStudentsInBlock: studentCount
                 };
-                
-                addBlockInput(true, blockDetails);
-
-                navigateToStep(3);
             }
 
 
-            function addBlockInput(isSpecial = false, details = {}) {
-                state.blockCount++;
-                const blockDiv = document.createElement('div');
-                blockDiv.className = 'block-item flex flex-col gap-4 mb-4 p-4 rounded-lg bg-slate-50 border border-slate-200';
-                
-                let blockHTML = `
-                    <div class="flex items-center justify-between">
-                        <div class="font-bold text-lg text-slate-700">${isSpecial ? 'Special Block' : `Block ${state.blockCount}`}</div>
-                        ${!isSpecial ? `<button class="remove-block-btn" onclick="this.closest('.block-item').remove(); updateStudentCountStatus();">&times;</button>` : ''}
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                `;
-
-                if (isSpecial) {
-                    blockHTML += `
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Exam Centre</label><input type="text" class="block-center" value="${details.center}" readonly></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Room No.</label><input type="text" class="block-room-no" value="${details.roomNo}" readonly></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Block No.</label><input type="text" class="block-no" value="${details.blockNo}" readonly></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">No. of Students</label><input type="number" class="block-students" value="${details.count}" readonly></div>
-                    `;
-                } else {
-                     blockHTML += `
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Exam Centre</label><select class="block-center" required><option value="">Select Center</option><option value="SOB">SOB</option><option value="SOP">SOP</option><option value="SOCSET" selected>SOCSET</option></select></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Room No.</label><input type="text" class="block-room-no" placeholder="e.g., EB 54" required></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">Block No.</label><input type="text" class="block-no" placeholder="e.g., 5" required></div>
-                        <div class="input-group"><label class="block text-sm font-medium text-slate-700 mb-1">No. of Students</label><input type="number" class="block-students" placeholder="Number of students" required min="1"></div>
-                     `;
-                }
-                blockHTML += `</div>`;
-                blockDiv.innerHTML = blockHTML;
-                ui.blocksContainer.appendChild(blockDiv);
-                updateStudentCountStatus();
-            }
-
-            function updateStudentCountStatus() {
-                window.updateStudentCountStatus = updateStudentCountStatus;
-                
-                state.studentsToAllocateCount = state.studentData.filter(s => !s.isAllocated).length;
-                ui.totalStudentsToAllocate.textContent = state.studentsToAllocateCount;
-                
-                const regularInputs = Array.from(ui.blocksContainer.querySelectorAll('.block-students:not([readonly])'));
-                let totalInRegularBlocks = regularInputs.reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
-                
-                ui.studentCountStatus.classList.remove('hidden', 'status-success', 'status-warn', 'status-error');
-                ui.nextToStep3Btn.disabled = true;
-
-                if (totalInRegularBlocks > state.studentsToAllocateCount) {
-                    ui.studentCountStatus.className = 'status-box status-error p-2 text-sm mt-0';
-                    ui.studentCountStatus.textContent = `Allocated: ${totalInRegularBlocks} (Exceeds remaining ${state.studentsToAllocateCount}!)`;
-                } else if (totalInRegularBlocks === state.studentsToAllocateCount) {
-                    ui.studentCountStatus.className = 'status-box status-success p-2 text-sm mt-0';
-                    ui.studentCountStatus.textContent = `Allocated: ${totalInRegularBlocks} (Perfect!)`;
-                    if (state.studentsToAllocateCount > 0 || ui.blocksContainer.querySelector('.block-students[readonly]')) {
-                         ui.nextToStep3Btn.disabled = false;
-                    }
-                } else {
-                    ui.studentCountStatus.className = 'status-box status-warn p-2 text-sm mt-0';
-                    ui.studentCountStatus.textContent = `Allocated: ${totalInRegularBlocks} (Remaining: ${state.studentsToAllocateCount - totalInRegularBlocks})`;
-                }
-
-                if (totalInRegularBlocks === 0 && ui.blocksContainer.children.length === 0) {
-                     ui.studentCountStatus.classList.add('hidden');
-                }
-                if (state.studentsToAllocateCount === 0 && ui.blocksContainer.querySelector('.block-students[readonly]')) {
-                    ui.nextToStep3Btn.disabled = false;
-                    ui.studentCountStatus.classList.add('hidden');
-                }
-
-            }
+            // --- PDF Generation Functions ---
             
-            // --- Step 3 & Final Generation ---
-            async function generateSheets() {
-                Object.values(ui.examDetails).forEach(el => el.classList.remove('input-error'));
-
+            async function generateSheets(combineMode) {
+                // Validation (omitted for brevity, assume valid inputs)
+                const inputElements = document.querySelectorAll('#step-3 input:not([type="checkbox"]), #step-3 select');
+                inputElements.forEach(el => el.classList.remove('input-error'));
+                
                 const generalDetails = {
                     branch: ui.examDetails.branch.value,
                     semester: ui.examDetails.semester.value,
@@ -623,10 +1217,13 @@
                     examDate: ui.examDetails.examDate.value,
                     examTime: ui.examDetails.examTime.value,
                     isRemedial: ui.examDetails.isRemedialExam.checked,
+                    includeSubjectColumn: ui.examDetails.includeSubjectColumn.checked
                 };
                 
                 let allDetailsFilled = true;
-                Object.keys(generalDetails).forEach(key => {
+                const mandatoryFields = ['branch', 'semester', 'academicYear', 'courseCode', 'courseName', 'specialization', 'examDate', 'examTime'];
+                
+                mandatoryFields.forEach(key => {
                     if (typeof generalDetails[key] === 'string' && generalDetails[key].trim() === '') {
                         allDetailsFilled = false;
                         ui.examDetails[key]?.classList.add('input-error');
@@ -635,7 +1232,7 @@
 
                 if (!allDetailsFilled) {
                     showStatus(ui.fileStatus, 'Please fill in all highlighted fields before generating.', 'error');
-                    navigateToStep(3);
+                    window.navigateToStep(3);
                     return;
                 }
 
@@ -644,30 +1241,52 @@
                 
                 try {
                     const blockElements = ui.blocksContainer.querySelectorAll('.block-item');
+                    const allBlockStudents = [];
+                    
+                    if (blockElements.length === 0) {
+                         throw new Error("No blocks have been defined in Step 2.");
+                    }
+                    
+                    if (!state.isBlankSheet) {
+                        state.studentData.forEach(s => s.isAllocated = false);
+                        const specialBlock = state.allocatedBlocks.find(b => b.isSpecial);
+                        if (specialBlock) {
+                            state.studentData.forEach(s => {
+                                if (specialBlock.studentEnrollments.includes(s[state.enrollmentNoKey])) {
+                                    s.isAllocated = true;
+                                }
+                            });
+                        }
+                    }
+
                     let studentIndexForRegularBlocks = state.studentData.findIndex(s => !s.isAllocated);
                     if (studentIndexForRegularBlocks === -1) studentIndexForRegularBlocks = state.studentData.length;
 
-                    const allBlockStudents = [];
-                    blockElements.forEach(block => {
-                        const studentCountInput = block.querySelector('.block-students');
-                        const count = parseInt(studentCountInput.value);
 
-                        if (studentCountInput.hasAttribute('readonly')) {
-                            allBlockStudents.push({
-                                students: state.studentData.filter(s => s.isAllocated),
-                                details: getBlockDetails(block, count, generalDetails)
-                            });
+                    state.allocatedBlocks.forEach(savedBlock => {
+                        const count = savedBlock.count;
+                        // Use getBlockDetails exposed to window
+                        const blockDetails = window.getBlockDetails(document.getElementById('blocks-container'), count, generalDetails); 
+                        
+                        if (state.isBlankSheet) {
+                            const blankStudents = Array(count).fill(null).map(() => ({
+                                [state.enrollmentNoKey]: '', 
+                                [state.studentNameKey]: ''  
+                            }));
+                            allBlockStudents.push({ students: blankStudents, details: { ...generalDetails, ...savedBlock } }); 
+
+                        } else if (savedBlock.isSpecial) {
+                            const students = state.studentData.filter(s => savedBlock.studentEnrollments.includes(s[state.enrollmentNoKey]));
+                            allBlockStudents.push({ students, details: { ...generalDetails, ...savedBlock } });
                         } else {
                             const students = state.studentData.slice(studentIndexForRegularBlocks, studentIndexForRegularBlocks + count);
                             studentIndexForRegularBlocks += count;
-                            allBlockStudents.push({
-                                students: students,
-                                details: getBlockDetails(block, count, generalDetails)
-                            });
+                            allBlockStudents.push({ students, details: { ...generalDetails, ...savedBlock } });
                         }
                     });
 
-                    const isCombineChecked = ui.combinePdfCheckbox.checked;
+
+                    const isCombineChecked = (combineMode === 'combined');
 
                     if (isCombineChecked) {
                         const doc = new jsPDF('p', 'mm', 'a4');
@@ -695,19 +1314,9 @@
                 }
             }
 
-            function getBlockDetails(blockElement, studentCount, generalDetails) {
-                 return {
-                    ...generalDetails,
-                    center: blockElement.querySelector('.block-center').value,
-                    roomNo: blockElement.querySelector('.block-room-no').value,
-                    blockNo: blockElement.querySelector('.block-no').value,
-                    totalStudentsInBlock: studentCount
-                };
-            }
 
             async function drawPageOnDoc(doc, students, examDetails, currentPage, totalPages) {
                 const pageWidth = doc.internal.pageSize.getWidth();
-                let startY;
                 let headerEndY = 10;
                 
                 const addLogoPromise = new Promise((resolve) => {
@@ -743,32 +1352,43 @@
 
                 await addLogoPromise;
                 
+                // --- PDF Header Formatting Update (3 Lines Total) ---
                 doc.setFont("helvetica", "normal").setFontSize(10);
+                // Line 1: Main Title
                 doc.text("Attendance Sheet", pageWidth - 15, 15, { align: "right" });
                 
-                let courseDetailsString = examDetails.branch;
+                // Line 2: Exam Details (Branch + Remedial + Specialization + Semester + Year)
+                let courseDetailsLine2 = `${examDetails.branch}`;
                 if (examDetails.isRemedial) {
-                    courseDetailsString += ' Remedial';
+                    courseDetailsLine2 += ' REMEDIAL';
                 }
                 if (examDetails.specialization) {
-                    courseDetailsString += ` ${examDetails.specialization}`;
+                     courseDetailsLine2 += ` ${examDetails.specialization}`;
                 }
-                courseDetailsString += ` ${examDetails.semester} - ${examDetails.academicYear} (Students: ${examDetails.totalStudentsInBlock})`;
+                courseDetailsLine2 += ` ${examDetails.semester} - ${examDetails.academicYear}`;
+                doc.text(courseDetailsLine2, pageWidth - 15, 20, { align: "right" }); // Moved up from 25 to 20
                 
-                doc.text(courseDetailsString, pageWidth - 15, 20, { align: "right" });
-                headerEndY = Math.max(headerEndY, 25);
+                // Line 3: Student Count
+                let courseDetailsLine3 = `(Students: ${examDetails.totalStudentsInBlock})`;
+                doc.text(courseDetailsLine3, pageWidth - 15, 25, { align: "right" }); // Moved up from 30 to 25
+                
+                headerEndY = Math.max(headerEndY, 30); // Max header end is now 25 + margin = 30
                 
                 // Draw the divider line
                 const lineY = headerEndY + 2;
-                doc.setDrawColor(0, 0, 0); // Black color
+                doc.setDrawColor(0, 0, 0); 
                 doc.setLineWidth(0.2);
-                doc.line(15, lineY, pageWidth - 15, lineY); // fromX, fromY, toX, toY
+                doc.line(15, lineY, pageWidth - 15, lineY); 
                 
-                startY = lineY + 3;
-
+                const startY = lineY + 3;
+                
+                // Get start/end enrollment (will be empty strings in blank mode)
                 const startEnrollment = students.length > 0 ? (students[0][state.enrollmentNoKey] || '') : '';
                 const endEnrollment = students.length > 0 ? (students[students.length - 1][state.enrollmentNoKey] || '') : '';
-                const enrollmentRange = `ENROLLMENT NO: FROM ${startEnrollment} TO ${endEnrollment}`;
+                
+                const enrollmentRange = state.isBlankSheet 
+                    ? `ENROLLMENT NO: MANUAL ENTRY` 
+                    : `ENROLLMENT NO: FROM ${startEnrollment} TO ${endEnrollment}`;
 
                 doc.autoTable({
                     startY: startY,
@@ -783,18 +1403,31 @@
                     columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 45 }, 2: { cellWidth: 'auto' } },
                 });
                 
-                const studentTableData = students.map((student, index) => [
-                    (index + 1), student[state.enrollmentNoKey] || '', student[state.studentNameKey] || '', '', ''
-                ]);
+                const studentTableData = students.map((student, index) => {
+                    const row = [ (index + 1), student[state.enrollmentNoKey] || '', student[state.studentNameKey] || '', '', '' ];
+                    if(examDetails.includeSubjectColumn) {
+                         row.splice(3, 0, ''); // Insert blank column for subject name
+                    }
+                    return row;
+                });
+
+                // Define headers dynamically based on checkbox
+                let mainTableHead = [['S.No.', 'Enrollment No.', 'Name of Student', 'No. of Supplementary', 'SIGN']];
+                let mainTableColStyles = { 0: { cellWidth: 10 }, 1: { cellWidth: 30 }, 2: { cellWidth: 70, halign: 'left' }, 3: { cellWidth: 30 }, 4: { cellWidth: 'auto' } };
+
+                if(examDetails.includeSubjectColumn) {
+                    mainTableHead = [['S.No.', 'Enrollment No.', 'Name of Student', 'Subject Name', 'No. of Supplementary', 'SIGN']];
+                    mainTableColStyles = { 0: { cellWidth: 10 }, 1: { cellWidth: 25 }, 2: { cellWidth: 55, halign: 'left' }, 3: { cellWidth: 35, halign: 'left' }, 4: { cellWidth: 25 }, 5: { cellWidth: 'auto' } };
+                }
 
                 doc.autoTable({
                     startY: doc.autoTable.previous.finalY + 4,
-                    head: [['S.No.', 'Enrollment No.', 'Name of Student', 'No. of Supplementary', 'SIGN']],
+                    head: mainTableHead,
                     body: studentTableData,
                     theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 2, halign: 'center', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.1 },
                     headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.1, lineColor: [0, 0, 0] },
-                    columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 30 }, 2: { cellWidth: 70, halign: 'left' }, 3: { cellWidth: 30 }, 4: { cellWidth: 'auto' } }
+                    columnStyles: mainTableColStyles
                 });
 
                 let finalY = doc.autoTable.previous.finalY;
@@ -846,6 +1479,8 @@
                 const statusClass = { 'success': 'status-success', 'warn': 'status-warn', 'error': 'status-error' };
                 element.className = `status-box ${statusClass[type]}`;
                 element.textContent = message;
+                
+                lucide.createIcons();
             }
             
             function resetApp() {
@@ -888,6 +1523,8 @@
             populateAcademicYears();
             initializePickers();
             preloadLogo();
+            setupEventListeners(); 
+            setTabMode(false); 
             navigateToStep(1);
         });
     </script>
