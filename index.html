@@ -1968,7 +1968,7 @@
                 );
                 
                 // Compact Signatures (Reduced gaps)
-                const sigY = finalY + 18; // Moved up from +28
+                const sigY = finalY + 22; // Moved up from +28
                 
                 doc.setFontSize(8); // Slightly larger for labels
                 doc.text("SIGNATURE INVIGILATOR", 20, sigY);
@@ -1978,8 +1978,8 @@
                 doc.text("Chief Superintendent", pageWidth - 20, sigY + 4, { align: "right" });
                 
                 // Page Number
-                doc.setFontSize(7);
-                doc.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
+                //doc.setFontSize(7);
+                //doc.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
             }
 
             function showStatus(element, message, type) {
@@ -2021,5 +2021,6 @@
     </script>
 </body>
 </html>
+
 
 
