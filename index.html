@@ -1868,21 +1868,18 @@
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const pageHeight = doc.internal.pageSize.getHeight();
                 
-                // 1. COMPACT HEADER: Start higher up (Y=10 instead of 15)
+                // 1. Header (Unchanged - Efficient)
                 let headerStartY = 10;
-                let headerEndY = headerStartY + 10; // Base end
+                let headerEndY = headerStartY + 10; 
             
-                // Logo Logic
                 if (state.logoBase64) {
-                    // Reduced logo size slightly to fit better
                     doc.addImage(state.logoBase64, 'PNG', 10, headerStartY, 40, (40/2.0)); 
                     headerEndY = headerStartY + (40/3.5); 
                 } else {
                     doc.setFont("helvetica", "bold").setFontSize(10).text("ITM SLS BARODA UNIVERSITY", 15, headerStartY + 5);
                 }
                 
-                // Header Text (Right Aligned) - Moved up
-                doc.setFont("helvetica", "normal").setFontSize(9); // Slightly smaller font
+                doc.setFont("helvetica", "normal").setFontSize(9);
                 doc.text("Attendance Sheet", pageWidth - 15, headerStartY + 5, { align: "right" });
                 
                 let line2 = `${examDetails.branch}`;
@@ -1892,7 +1889,6 @@
                 doc.text(line2, pageWidth - 15, headerStartY + 10, { align: "right" });
                 doc.text(`(Students: ${examDetails.totalStudentsInBlock})`, pageWidth - 15, headerStartY + 15, { align: "right" });
                 
-                // Divider Line
                 headerEndY = Math.max(headerEndY, headerStartY + 20);
                 doc.setDrawColor(0); doc.setLineWidth(0.2); 
                 doc.line(15, headerEndY, pageWidth - 15, headerEndY); 
@@ -1901,11 +1897,11 @@
                 const eEnr = students.length ? (students[students.length-1][state.enrollmentNoKey]||'') : '';
                 const range = state.isBlankSheet ? "MANUAL ENTRY" : `FROM ${sEnr} TO ${eEnr}`;
             
-                // 2. COMPACT DETAILS TABLE
+                // 2. Exam Details Table
                 doc.autoTable({
-                    startY: headerEndY + 2, // Closer to line
+                    startY: headerEndY + 2, 
                     theme: 'grid',
-                    styles: { fontSize: 8, cellPadding: 1, lineWidth: 0.3, lineColor: 0, valign: 'middle', textColor: 0 }, // Reduced padding
+                    styles: { fontSize: 8, cellPadding: 1, lineWidth: 0.3, lineColor: 0, valign: 'middle', textColor: 0 },
                     headStyles: { lineColor: 0 },
                     body: [
                         [{ content: `CENTRE: SOCSET` }, { content: `BLOCK NO: ${examDetails.blockNo}` }, { content: `DATE: ${examDetails.examDate} | TIME: ${examDetails.examTime}` }],
@@ -1928,13 +1924,12 @@
                     cols = { 0: { cellWidth: 10 }, 1: { cellWidth: 25 }, 2: { cellWidth: 55, halign: 'left' }, 3: { cellWidth: 35, halign: 'left' }, 4: { cellWidth: 25 }, 5: { cellWidth: 'auto' } };
                 }
             
-                // 3. COMPACT STUDENT LIST
+                // 3. Student List (Compact to ensure 30 fit)
                 doc.autoTable({
-                    startY: doc.autoTable.previous.finalY + 2, // Closer to details
+                    startY: doc.autoTable.previous.finalY + 2, 
                     head: head, 
                     body: tableData, 
                     theme: 'grid',
-                    // KEY CHANGE: Reduced fontSize to 7 and cellPadding to 1.5 to save height
                     styles: { fontSize: 7, cellPadding: 1.5, halign: 'center', textColor: 0, lineColor: 0, lineWidth: 0.3 }, 
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'bold', lineColor: 0, lineWidth: 0.3 },
                     columnStyles: cols
@@ -1942,44 +1937,45 @@
             
                 let finalY = doc.autoTable.previous.finalY;
             
-                // 4. SMART PAGE BREAK LOGIC
-                // We only need about 40mm for the footer. If we have less than 40mm, THEN add page.
-                // Previous logic was < 75, which forced a break too early.
-                if (pageHeight - finalY < 40) { 
+                // 4. Page Break Check
+                // We check if we have enough space for the footer (approx 55mm needed for comfortable signatures)
+                if (pageHeight - finalY < 55) { 
                     doc.addPage(); 
-                    finalY = 15; // Reset Y for new page
+                    finalY = 15; 
                 }
             
-                // 5. COMPACT FOOTER
+                // 5. Summary Table
                 doc.autoTable({
-                    startY: finalY + 4, // Closer to list
+                    startY: finalY + 4,
                     head: [["Total No. of Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"]],
                     body: [[examDetails.totalStudentsInBlock, "", "", "", "", ""]], theme: 'grid',
-                    styles: { fontSize: 7, halign: 'center', cellPadding: 1.5, textColor: 0, lineColor: 0, lineWidth: 0.3 },
+                    styles: { fontSize: 7, halign: 'center', cellPadding: 2, textColor: 0, lineColor: 0, lineWidth: 0.3 }, // Increased padding slightly for readability
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'bold', lineColor: 0, lineWidth: 0.3 }
                 });
             
                 finalY = doc.autoTable.previous.finalY;
                 
-                // Compact Declaration Text
+                // 6. Declaration
                 doc.setFontSize(7).text(
                     "I HEREBY DECLARE THAT I HAVE VERIFIED ABOVE MENTIONED DETAILS AND ALSO DECLARE THAT STUDENTS HAVE RETURNED THESE ANSWER BOOKS AS MENTIONED ABOVE.", 
-                    15, finalY + 5, { maxWidth: pageWidth - 30 }
+                    15, finalY + 6, { maxWidth: pageWidth - 30 }
                 );
+            
+                const sigY = finalY + 25; 
                 
-                // Compact Signatures (Reduced gaps)
-                const sigY = finalY + 22; // Moved up from +28
+                doc.setFontSize(8);
                 
-                doc.setFontSize(8); // Slightly larger for labels
+                // Left Block
                 doc.text("SIGNATURE INVIGILATOR", 20, sigY);
-                doc.text("SIGNATURE", pageWidth / 2, sigY, { align: "center" });
-                doc.text("Deputy Chief Superintendent", pageWidth / 2, sigY + 4, { align: "center" });
-                doc.text("SIGNATURE", pageWidth - 20, sigY, { align: "right" });
-                doc.text("Chief Superintendent", pageWidth - 20, sigY + 4, { align: "right" });
                 
-                // Page Number
-                //doc.setFontSize(7);
-                //doc.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
+                // Center Block
+                doc.text("SIGNATURE", pageWidth / 2, sigY, { align: "center" });
+                doc.text("Deputy Chief Superintendent", pageWidth / 2, sigY + 5, { align: "center" }); // Added gap
+                
+                // Right Block
+                doc.text("SIGNATURE", pageWidth - 20, sigY, { align: "right" });
+                doc.text("Chief Superintendent", pageWidth - 20, sigY + 5, { align: "right" }); // Added gap
+                
             }
 
             function showStatus(element, message, type) {
@@ -2021,6 +2017,7 @@
     </script>
 </body>
 </html>
+
 
 
 
