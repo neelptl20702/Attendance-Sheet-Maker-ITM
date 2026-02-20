@@ -1937,13 +1937,13 @@
             
                 let finalY = doc.autoTable.previous.finalY;
             
-                // 4. Page Break Check - DECREASED TO 35mm
+                // 4. Page Break Check - 35mm
                 if (pageHeight - finalY < 35) { 
                     doc.addPage(); 
                     finalY = 15; 
                 }
             
-                // 5. Summary Table - Layout from Image
+                // 5. Summary Table
                 doc.autoTable({
                     startY: finalY + 4,
                     head: [["Total Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"]],
@@ -1953,25 +1953,28 @@
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'bold', lineColor: 0, lineWidth: 0.3 }
                 });
             
-                // Populate Total Students in first cell
+                // FIX: "Total Students" number alignment adjusted to match pic
                 doc.setFont("helvetica", "bold").setFontSize(8);
-                doc.text(String(examDetails.totalStudentsInBlock), 15 + (pageWidth - 30) / 12, doc.autoTable.previous.finalY - 2.5, { align: 'center' });
+                const firstCellWidth = (pageWidth - 30) / 6; 
+                const cellCenterX = 15 + (firstCellWidth / 2);
+                // Adjusted vertical offset (+0.5) to fix the "lil off" centering
+                doc.text(String(examDetails.totalStudentsInBlock), cellCenterX, doc.autoTable.previous.finalY - 2.2, { align: 'center' });
             
                 finalY = doc.autoTable.previous.finalY;
                 
-                // 6. Declaration - Layout from Image
+                // 6. Declaration - FIX: CENTER ALIGN
                 doc.setFont("helvetica", "normal").setFontSize(8);
-                doc.text(
-                    "I hereby declare that I have verified above mentioned details and also declare that students have returned these answer books as mentioned above.", 
-                    15, finalY + 6, { maxWidth: pageWidth - 30 }
-                );
+                const declarationText = "I hereby declare that I have verified above mentioned details and also declare that students have returned these answer books as mentioned above.";
+                doc.text(declarationText, pageWidth / 2, finalY + 6, { align: 'center', maxWidth: pageWidth - 30 });
                 
-                // 7. Signature Footer with Horizontal Lines - Exact Image Design
+                // 7. Signature Footer - FIX: BLACK COLOR AF
                 const lineY = finalY + 22; 
                 const textY = lineY + 5;  
-                const lineWidth = 58; // Sized to fit 3 columns across A4
+                const lineWidth = 58; 
             
-                doc.setLineWidth(0.3);
+                // Pure Black for lines
+                doc.setDrawColor(0, 0, 0); 
+                doc.setLineWidth(0.4); // Slightly thicker for "BLACK AF" look
                 
                 // Signature of Invigilator
                 doc.line(15, lineY, 15 + lineWidth, lineY);
@@ -1985,8 +1988,6 @@
                 // Signature of Chief Superintendent
                 doc.line(pageWidth - 15 - lineWidth, lineY, pageWidth - 15, lineY);
                 doc.text("Signature of Chief Superintendent", pageWidth - 15 - lineWidth / 2, textY, { align: "center" });
-                
-                // PAGE NUMBERS REMOVED
             }
 
             function showStatus(element, message, type) {
@@ -2028,5 +2029,6 @@
     </script>
 </body>
 </html>
+
 
 
