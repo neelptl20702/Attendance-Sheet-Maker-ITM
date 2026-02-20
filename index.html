@@ -1868,7 +1868,7 @@
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const pageHeight = doc.internal.pageSize.getHeight();
                 
-                // 1. Header Section
+                // 1. Header (Unchanged - Efficient)
                 let headerStartY = 10;
                 let headerEndY = headerStartY + 10; 
             
@@ -1897,7 +1897,7 @@
                 const eEnr = students.length ? (students[students.length-1][state.enrollmentNoKey]||'') : '';
                 const range = state.isBlankSheet ? "MANUAL ENTRY" : `FROM ${sEnr} TO ${eEnr}`;
             
-                // 2. Exam Info Table
+                // 2. Exam Details Table
                 doc.autoTable({
                     startY: headerEndY + 2, 
                     theme: 'grid',
@@ -1924,65 +1924,77 @@
                     cols = { 0: { cellWidth: 10 }, 1: { cellWidth: 25 }, 2: { cellWidth: 55, halign: 'left' }, 3: { cellWidth: 35, halign: 'left' }, 4: { cellWidth: 25 }, 5: { cellWidth: 'auto' } };
                 }
             
-                // 3. Main Student List (Font 7 used to guarantee 30 entries fit)
+                // 3. Student List (Compact to ensure 30 fit)
                 doc.autoTable({
                     startY: doc.autoTable.previous.finalY + 2, 
                     head: head, 
                     body: tableData, 
                     theme: 'grid',
-                    styles: { fontSize: 7, cellPadding: 1.5, halign: 'center', textColor: 0, lineColor: 0, lineWidth: 0.3 }, 
+                    styles: { fontSize: 8, cellPadding: 1.5, halign: 'center', textColor: 0, lineColor: 0, lineWidth: 0.3 }, 
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'bold', lineColor: 0, lineWidth: 0.3 },
                     columnStyles: cols
                 });
             
                 let finalY = doc.autoTable.previous.finalY;
             
-                // 4. Page Break Check (Decreased to 35mm as requested)
-                if (pageHeight - finalY < 35) { 
+                // 4. Page Break Check
+                // We check if we have enough space for the footer (approx 55mm needed for comfortable signatures)
+                if (pageHeight - finalY < 40) { 
                     doc.addPage(); 
                     finalY = 15; 
                 }
             
-                // 5. Summary Table (Font size 8 as per request)
+                // 5. Summary Table
                 doc.autoTable({
                     startY: finalY + 4,
-                    head: [["Total Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"]],
-                    body: [["", "", "", "", "", ""]], // Empty row for manual entry
-                    theme: 'grid',
-                    styles: { fontSize: 8, halign: 'center', cellPadding: 2, textColor: 0, lineColor: 0, lineWidth: 0.3 },
+                    head: [["Total No. of Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"]],
+                    body: [[examDetails.totalStudentsInBlock, "", "", "", "", ""]], theme: 'grid',
+                    styles: { fontSize: 7, halign: 'center', cellPadding: 2, textColor: 0, lineColor: 0, lineWidth: 0.3 }, // Increased padding slightly for readability
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'bold', lineColor: 0, lineWidth: 0.3 }
                 });
             
                 finalY = doc.autoTable.previous.finalY;
                 
                 // 6. Declaration
-                doc.setFontSize(8).text(
+                doc.setFontSize(7).text(
                     "I hereby declare that I have verified above mentioned details and also declare that students have returned these answer books as mentioned above.", 
-                    pageWidth / 2, finalY + 6, { align: "center", maxWidth: pageWidth - 30 }
+                    15, finalY + 6, { maxWidth: pageWidth - 30 }
                 );
+            
+                const sigY = finalY + 25; 
                 
-                // 7. Signature Design with Lines (Matching your template)
-                const sigLineY = finalY + 25; 
-                const sigTextY = sigLineY + 5;
-                const lineWidth = 55;
-            
-                doc.setLineWidth(0.3);
+                doc.setFontSize(8);
                 
-                // Signature Line 1: Invigilator
-                doc.line(15, sigLineY, 15 + lineWidth, sigLineY);
-                doc.text("Signature of Invigilator", 15 + (lineWidth/2), sigTextY, { align: "center" });
+                // Left Block
+                doc.text("SIGNATURE INVIGILATOR", 20, sigY);
+                
+                // Center Block
+                doc.text("SIGNATURE", pageWidth / 2, sigY, { align: "center" });
+                doc.text("Deputy Chief Superintendent", pageWidth / 2, sigY + 5, { align: "center" }); // Added gap
+                
+                // Right Block
+                doc.text("SIGNATURE", pageWidth - 20, sigY, { align: "right" });
+                doc.text("Chief Superintendent", pageWidth - 20, sigY + 5, { align: "right" }); // Added gap
+                
+            }
+
+            function showStatus(element, message, type) {
+                const cls = { 'success': 'status-success', 'warn': 'status-warn', 'error': 'status-error' };
+                element.className = `status-box ${cls[type]}`;
+                element.textContent = message;
+                element.classList.remove('hidden');
+                lucide.createIcons();
+            }
             
-                // Signature Line 2: Deputy Chief Superintendent
-                const centerStart = (pageWidth / 2) - (lineWidth / 2);
-                doc.line(centerStart, sigLineY, centerStart + lineWidth, sigLineY);
-                doc.text("Signature of Deputy Chief Superintendent", pageWidth / 2, sigTextY, { align: "center" });
-            
-                // Signature Line 3: Chief Superintendent
-                const rightStart = pageWidth - 15 - lineWidth;
-                doc.line(rightStart, sigLineY, rightStart + lineWidth, sigLineY);
-                doc.text("Signature of Chief Superintendent", rightStart + (lineWidth/2), sigTextY, { align: "center" });
-            
-                // Note: Page numbers removed as previously requested
+            // Init
+            function populateAcademicYears() {
+                const yearSelect = ui.examDetails.academicYear; yearSelect.innerHTML = '<option value="">Select Academic Year</option>';
+                const y = new Date().getFullYear();
+                for (let i = -1; i < 4; i++) { 
+                    const opt = document.createElement('option');
+                    opt.value = `${y+i}-${(y+i+1).toString().slice(-2)}`; opt.textContent = opt.value;
+                    if(i === 0) opt.selected = true; yearSelect.appendChild(opt);
+                }
             }
             
             async function preloadLogo() {
@@ -2005,13 +2017,4 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
 
