@@ -1868,7 +1868,7 @@
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const pageHeight = doc.internal.pageSize.getHeight();
                 
-                // 1. Header (Unchanged - Efficient)
+                // 1. Header Section
                 let headerStartY = 10;
                 let headerEndY = headerStartY + 10; 
             
@@ -1924,58 +1924,69 @@
                     cols = { 0: { cellWidth: 10 }, 1: { cellWidth: 25 }, 2: { cellWidth: 55, halign: 'left' }, 3: { cellWidth: 35, halign: 'left' }, 4: { cellWidth: 25 }, 5: { cellWidth: 'auto' } };
                 }
             
-                // 3. Student List (Compact to ensure 30 fit)
+                // 3. Student List - CONTENT SIZE 8
                 doc.autoTable({
                     startY: doc.autoTable.previous.finalY + 2, 
                     head: head, 
                     body: tableData, 
                     theme: 'grid',
-                    styles: { fontSize: 8, cellPadding: 1.5, halign: 'center', textColor: 0, lineColor: 0, lineWidth: 0.3 }, 
+                    styles: { fontSize: 8, cellPadding: 1.2, halign: 'center', textColor: 0, lineColor: 0, lineWidth: 0.3 }, 
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'bold', lineColor: 0, lineWidth: 0.3 },
                     columnStyles: cols
                 });
             
                 let finalY = doc.autoTable.previous.finalY;
             
-                // 4. Page Break Check
-                // We check if we have enough space for the footer (approx 55mm needed for comfortable signatures)
-                if (pageHeight - finalY < 40) { 
+                // 4. Page Break Check - DECREASED TO 35mm
+                if (pageHeight - finalY < 35) { 
                     doc.addPage(); 
                     finalY = 15; 
                 }
             
-                // 5. Summary Table
+                // 5. Summary Table - Layout from Image
                 doc.autoTable({
                     startY: finalY + 4,
-                    head: [["Total No. of Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"]],
-                    body: [[examDetails.totalStudentsInBlock, "", "", "", "", ""]], theme: 'grid',
-                    styles: { fontSize: 7, halign: 'center', cellPadding: 2, textColor: 0, lineColor: 0, lineWidth: 0.3 }, // Increased padding slightly for readability
+                    head: [["Total Students", "Present Students", "Absent Students", "Answerbook Used", "Supplementary Used", "Malpractice Reported"]],
+                    body: [["", "", "", "", "", ""]], 
+                    theme: 'grid',
+                    styles: { fontSize: 8, halign: 'center', cellPadding: 2, textColor: 0, lineColor: 0, lineWidth: 0.3 },
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'bold', lineColor: 0, lineWidth: 0.3 }
                 });
             
+                // Populate Total Students in first cell
+                doc.setFont("helvetica", "bold").setFontSize(8);
+                doc.text(String(examDetails.totalStudentsInBlock), 15 + (pageWidth - 30) / 12, doc.autoTable.previous.finalY - 2.5, { align: 'center' });
+            
                 finalY = doc.autoTable.previous.finalY;
                 
-                // 6. Declaration
-                doc.setFontSize(7).text(
+                // 6. Declaration - Layout from Image
+                doc.setFont("helvetica", "normal").setFontSize(8);
+                doc.text(
                     "I hereby declare that I have verified above mentioned details and also declare that students have returned these answer books as mentioned above.", 
                     15, finalY + 6, { maxWidth: pageWidth - 30 }
                 );
+                
+                // 7. Signature Footer with Horizontal Lines - Exact Image Design
+                const lineY = finalY + 22; 
+                const textY = lineY + 5;  
+                const lineWidth = 58; // Sized to fit 3 columns across A4
             
-                const sigY = finalY + 25; 
+                doc.setLineWidth(0.3);
                 
-                doc.setFontSize(8);
+                // Signature of Invigilator
+                doc.line(15, lineY, 15 + lineWidth, lineY);
+                doc.text("Signature of Invigilator", 15 + lineWidth / 2, textY, { align: "center" });
                 
-                // Left Block
-                doc.text("SIGNATURE INVIGILATOR", 20, sigY);
+                // Signature of Deputy Chief Superintendent
+                const centerStart = (pageWidth / 2) - (lineWidth / 2);
+                doc.line(centerStart, lineY, centerStart + lineWidth, lineY);
+                doc.text("Signature of Deputy Chief Superintendent", pageWidth / 2, textY, { align: "center" });
                 
-                // Center Block
-                doc.text("SIGNATURE", pageWidth / 2, sigY, { align: "center" });
-                doc.text("Deputy Chief Superintendent", pageWidth / 2, sigY + 5, { align: "center" }); // Added gap
+                // Signature of Chief Superintendent
+                doc.line(pageWidth - 15 - lineWidth, lineY, pageWidth - 15, lineY);
+                doc.text("Signature of Chief Superintendent", pageWidth - 15 - lineWidth / 2, textY, { align: "center" });
                 
-                // Right Block
-                doc.text("SIGNATURE", pageWidth - 20, sigY, { align: "right" });
-                doc.text("Chief Superintendent", pageWidth - 20, sigY + 5, { align: "right" }); // Added gap
-                
+                // PAGE NUMBERS REMOVED
             }
 
             function showStatus(element, message, type) {
@@ -2017,4 +2028,5 @@
     </script>
 </body>
 </html>
+
 
