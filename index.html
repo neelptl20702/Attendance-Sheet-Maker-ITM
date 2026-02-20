@@ -1939,7 +1939,7 @@
             
                 // 4. Page Break Check
                 // We check if we have enough space for the footer (approx 55mm needed for comfortable signatures)
-                if (pageHeight - finalY < 55) { 
+                if (pageHeight - finalY < 40) { 
                     doc.addPage(); 
                     finalY = 15; 
                 }
@@ -2017,6 +2017,7 @@
     </script>
 </body>
 </html>
+
 
 
 
